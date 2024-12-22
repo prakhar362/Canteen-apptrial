@@ -4,9 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface SearchBarProps {
   placeholder: string;
+  onSearch: (text: string) => void; // Callback to handle search term change
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ placeholder }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ placeholder, onSearch }) => {
   return (
     <View style={styles.container}>
       <Ionicons name="search" size={20} color="#999" style={styles.icon} />
@@ -14,6 +15,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeholder }) => {
         placeholder={placeholder}
         style={styles.input}
         placeholderTextColor="#999"
+        onChangeText={onSearch} // Call onSearch to update search term
       />
     </View>
   );

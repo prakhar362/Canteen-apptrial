@@ -1,16 +1,17 @@
-// CategoryCard.tsx
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 interface CategoryCardProps {
   title: string;
   active?: boolean;
+  onPress: () => void; // Add onPress handler
 }
 
-const CategoryCard: React.FC<CategoryCardProps> = ({ title, active }) => {
+const CategoryCard: React.FC<CategoryCardProps> = ({ title, active, onPress }) => {
   return (
     <TouchableOpacity
       style={[styles.card, active ? styles.activeCard : styles.inactiveCard]}
+      onPress={onPress} // Handle category change on press
     >
       <Text style={active ? styles.activeText : styles.inactiveText}>{title}</Text>
     </TouchableOpacity>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import GlobalStyles from '@/styles/GlobalStyles';
+import { Ionicons } from '@expo/vector-icons';
 
 const Header: React.FC = () => {
   return (
@@ -11,7 +12,10 @@ const Header: React.FC = () => {
       </TouchableOpacity>
       <Text style={styles.logo}>Food</Text>
       <TouchableOpacity style={styles.cartIcon}>
-        <Text style={styles.cartBadge}>2</Text>
+      <Ionicons
+        name="cart-outline"
+        size={30}
+        color="#FF7622"/>
       </TouchableOpacity>
     </View>
   );
@@ -46,3 +50,4 @@ const styles = StyleSheet.create({
 });
 
 export default Header;
+
