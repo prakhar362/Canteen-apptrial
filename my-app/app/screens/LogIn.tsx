@@ -8,6 +8,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 type RootStackParamList = {
   LogIn: undefined;
   Signup: undefined;
+  Home: undefined;
 };
 
 type LogInScreenNavigationProp = StackNavigationProp<RootStackParamList, "LogIn">;
@@ -77,7 +78,7 @@ const SignIn: React.FC = () => {
 
       <TouchableOpacity
         className="bg-orange-500 p-3 rounded-md mt-16 w-80 h-12"
-        onPress={handleSubmit}
+        onPress={()=> navigation.navigate("Home")}
       >
         <Text className="text-white text-center font-semibold">Sign In</Text>
       </TouchableOpacity>
