@@ -2,13 +2,19 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+// import axios from "axios"
+type RootStackParamList = {
+  LogIn: undefined;
+  Signup: undefined;
+};
 
-
+type SignUpScreenNavigationProp = StackNavigationProp<RootStackParamList, "Signup">;
 const Signup = () => {
-  const navigation = useNavigation(); // Navigation hook
+  const navigation = useNavigation<SignUpScreenNavigationProp>(); // Navigation hook
 
   const [form, setForm] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -16,13 +22,22 @@ const Signup = () => {
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const handleSubmit = () => {
-    if (!form.name || !form.email || !form.password || !form.confirmPassword) {
+  const handleSubmit = async() => {
+    if (!form.username || !form.email || !form.password || !form.confirmPassword) {
       Alert.alert("Error", "Please fill in all fields");
     } else if (form.password !== form.confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
     } else {
-      Alert.alert("Success", "Account created successfully");
+      const response=await fetch("http://localhost:5000/api/v1/auth/signup", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({...form})
+      })
+      console.log(response)
+      const data=await response.json();
+      console.log(data)
     }
   };
 
@@ -47,9 +62,9 @@ const Signup = () => {
       {/* Name Input */}
       <TextInput
         className="bg-gray-200 p-3 rounded-md mb-4 w-80 h-12"
-        placeholder="Enter your name"
-        value={form.name}
-        onChangeText={(e) => setForm({ ...form, name: e })}
+        placeholder="Enter your username"
+        value={form.username}
+        onChangeText={(e) => setForm({ ...form, username: e })}
       />
 
       {/* Email Input */}

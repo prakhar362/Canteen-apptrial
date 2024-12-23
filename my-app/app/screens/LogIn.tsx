@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -10,7 +17,10 @@ type RootStackParamList = {
   Signup: undefined;
 };
 
-type LogInScreenNavigationProp = StackNavigationProp<RootStackParamList, "LogIn">;
+type LogInScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "LogIn"
+>;
 
 const SignIn: React.FC = () => {
   const navigation = useNavigation<LogInScreenNavigationProp>();
@@ -22,11 +32,20 @@ const SignIn: React.FC = () => {
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.email || !form.password) {
       Alert.alert("Error", "Please fill in all fields");
     } else {
-      Alert.alert("Success", "Form submitted successfully");
+      const response = await fetch("http://localhost:5000/api/v1/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...form }),
+      });
+      console.log(response);
+      const data = await response.json();
+      console.log(data);
     }
   };
 
@@ -39,11 +58,17 @@ const SignIn: React.FC = () => {
       source={require("../assets/images/Bg_login.png")}
       className="flex-1 justify-center items-center opacity-100 bg-slate-700"
     >
-      <Text className="text-white text-4xl font-extrabold mb-6" style={{ fontFamily: "Sen-Regular" }}>
+      <Text
+        className="text-white text-4xl font-extrabold mb-6"
+        style={{ fontFamily: "Sen-Regular" }}
+      >
         Sign In
       </Text>
 
-      <Text className="text-white text-lg mb-4" style={{ fontFamily: "Sen-Regular" }}>
+      <Text
+        className="text-white text-lg mb-4"
+        style={{ fontFamily: "Sen-Regular" }}
+      >
         Please sign in to your account
       </Text>
 
@@ -67,7 +92,11 @@ const SignIn: React.FC = () => {
           className="absolute right-3 top-1/2 transform -translate-y-1/2"
           onPress={togglePasswordVisibility}
         >
-          <Ionicons name={isPasswordVisible ? "eye-off" : "eye"} size={24} color="gray" />
+          <Ionicons
+            name={isPasswordVisible ? "eye-off" : "eye"}
+            size={24}
+            color="gray"
+          />
         </TouchableOpacity>
       </View>
 
