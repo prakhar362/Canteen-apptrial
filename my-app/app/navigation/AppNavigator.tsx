@@ -3,11 +3,13 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Splash from "../screens/SplashScreen";
 import LogIn from "../screens/LogIn";
 import Signup from "../screens/Signup";
+import Home  from "../screens/Home";
 
 type RootStackParamList = {
   Splash: undefined;
   LogIn: undefined;
   Signup: undefined;
+  Home:undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -31,6 +33,7 @@ const AppNavigator: React.FC = () => {
         <>
           <Stack.Screen name="LogIn" component={LogIn} />
           <Stack.Screen name="Signup" component={Signup} />
+          <Stack.Screen name="Home" component={Home}/>
         </>
       )}
     </Stack.Navigator>
