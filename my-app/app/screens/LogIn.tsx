@@ -44,9 +44,12 @@ const SignIn: React.FC = () => {
         },
         body: JSON.stringify({ ...form }),
       });
-      console.log(response);
+      // console.log(response);
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
+      if(data.success && data.user){
+        navigation.navigate("Home");
+      }
     }
   };
 
@@ -107,7 +110,7 @@ const SignIn: React.FC = () => {
 
       <TouchableOpacity
         className="bg-orange-500 p-3 rounded-md mt-16 w-80 h-12"
-        onPress={()=> navigation.navigate("Home")}
+        onPress={handleSubmit}
       >
         <Text className="text-white text-center font-semibold">Sign In</Text>
       </TouchableOpacity>
