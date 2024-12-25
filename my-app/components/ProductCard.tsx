@@ -1,22 +1,30 @@
-// ProductCard.tsx
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+// FoodItemCard.tsx
+import React from "react";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
-interface ProductCardProps {
+// Define the props for FoodItemCard
+interface FoodItemCardProps {
   title: string;
   rating: number;
   time: string;
   imageUrl: string;
+  onPress: () => void; // Handler when the card is clicked
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ title, rating, time, imageUrl }) => {
+const FoodItemCard: React.FC<FoodItemCardProps> = ({
+  title,
+  rating,
+  time,
+  imageUrl,
+  onPress,
+}) => {
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
-      <Text style={styles.title}>{title}</Text>
-      <View style={styles.details}>
-        <Text style={styles.rating}>⭐ {rating}</Text>
-        <Text style={styles.time}>⏱️ {time}</Text>
+      <View style={styles.info}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.rating}>⭐ Rating: {rating}</Text>
+        <Text style={styles.time}>⏱️ Time: {time}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -24,37 +32,37 @@ const ProductCard: React.FC<ProductCardProps> = ({ title, rating, time, imageUrl
 
 const styles = StyleSheet.create({
   card: {
-    width: '48%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    width: "48%",
     marginBottom: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4,
   },
   image: {
-    width: '100%',
-    height: 120,
+    width: "100%",
+    height: 150,
+    borderRadius: 10,
+  },
+  info: {
+    padding: 10,
   },
   title: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    margin: 8,
-  },
-  details: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 8,
-    paddingBottom: 8,
+    fontSize: 16,
+    fontWeight: "bold",
   },
   rating: {
-    fontSize: 12,
-    color: '#FFCC00',
+    fontSize: 14,
+    color: "gray",
   },
   time: {
-    fontSize: 12,
-    color: '#333',
+    fontSize: 14,
+    color: "gray",
   },
 });
 
-export default ProductCard;
+export default FoodItemCard;

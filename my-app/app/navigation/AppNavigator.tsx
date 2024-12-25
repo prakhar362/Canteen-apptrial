@@ -3,14 +3,25 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Splash from "../screens/SplashScreen";
 import LogIn from "../screens/LogIn";
 import Signup from "../screens/Signup";
-import Home  from "../screens/Home";
+import Home from "../screens/Home";
+import FoodItemDetails from "../screens/FoodItemDetails"; // Import the details screen
 
-type RootStackParamList = {
+export type RootStackParamList = {
   Splash: undefined;
   LogIn: undefined;
   Signup: undefined;
-  Home:undefined;
+  Home: undefined;
+  FoodItemDetails: { foodItem: FoodItem }; // foodItem must be passed
 };
+
+export interface FoodItem {
+  id: number;
+  title: string;
+  rating: number;
+  time: string;
+  imageUrl: string;
+  category: string;
+}
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -33,7 +44,8 @@ const AppNavigator: React.FC = () => {
         <>
           <Stack.Screen name="LogIn" component={LogIn} />
           <Stack.Screen name="Signup" component={Signup} />
-          <Stack.Screen name="Home" component={Home}/>
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="FoodItemDetails" component={FoodItemDetails} />
         </>
       )}
     </Stack.Navigator>
