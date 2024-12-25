@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   image: {
-    width: 150, // Adjust width as needed
-    height: 150, // Adjust height as needed
+    width: 100, // Adjust width as needed
+    height: 50, // Adjust height as needed
     resizeMode: "contain", // Ensures the image maintains its aspect ratio
   },
 });

@@ -21,6 +21,8 @@ export interface FoodItem {
   time: string;
   imageUrl: string;
   category: string;
+  price:number;
+  description:string;
 }
 
 const Stack = createStackNavigator<RootStackParamList>();

@@ -1,130 +1,176 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../navigation/AppNavigator"; // Correct import
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
-// Define the type for the route params to get the `foodItem`
 type FoodItemDetailsRouteProp = RouteProp<RootStackParamList, "FoodItemDetails">;
 
 const FoodItemDetails: React.FC = () => {
-  // Get the route parameters (i.e., foodItem)
   const route = useRoute<FoodItemDetailsRouteProp>();
+  const navigation = useNavigation();
   const { foodItem } = route.params;
 
-  // State to keep track of quantity
   const [quantity, setQuantity] = useState<number>(1);
 
-  // Function to increase quantity
-  const increaseQuantity = () => {
-    setQuantity(prevQuantity => prevQuantity + 1);
-  };
+  const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  // Function to decrease quantity (minimum 1)
-  const decreaseQuantity = () => {
-    setQuantity(prevQuantity => (prevQuantity > 1 ? prevQuantity - 1 : 1));
-  };
-
-  // Handle "Add to Cart" button press
   const handleAddToCart = () => {
-    // Logic to add to cart (you can pass the quantity and foodItem to a cart state or redux)
     console.log(`Added ${quantity} of ${foodItem.title} to the cart`);
   };
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: foodItem.imageUrl }} style={styles.image} />
-      <Text style={styles.title}>{foodItem.title}</Text>
-      <br />
-      <View style={styles.detailsContainer}>
-  <Text style={styles.rating}>⭐ Rating: {foodItem.rating}</Text>
-  <Text style={styles.time}>⏱️ Time: {foodItem.time}</Text>
-</View>
-      <Text style={styles.category}>Category: {foodItem.category}</Text>
-
-      {/* Quantity Selection */}
-      <View style={styles.quantityContainer}>
-        <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
-          <Text style={styles.quantityButtonText}>-</Text>
+      {/* Header with Back Button */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back-outline" size={24} color="#000" />
         </TouchableOpacity>
+        <Text style={styles.headerText}>Details</Text>
+      </View>
 
-        <Text style={styles.quantityText}>{quantity}</Text>
-
-        <TouchableOpacity onPress={increaseQuantity} style={styles.quantityButton}>
-          <Text style={styles.quantityButtonText}>+</Text>
+      {/* Food Image */}
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: foodItem.imageUrl }} style={styles.image} />
+        <TouchableOpacity style={styles.favoriteButton}>
+          <Ionicons name="heart-outline" size={24} color="#FFF" />
         </TouchableOpacity>
       </View>
 
-      {/* Add to Cart Button */}
-      <TouchableOpacity onPress={handleAddToCart} style={styles.addToCartButton}>
-        <Text style={styles.addToCartText}>Add to Cart</Text>
-      </TouchableOpacity>
+      {/* Food Details */}
+      <Text style={styles.title}>{foodItem.title}</Text>
+      <Text style={styles.description}>{foodItem.description}</Text>
+
+      <View style={styles.detailsRow}>
+        <Text style={styles.rating}>⭐ {foodItem.rating}</Text>
+        <Text style={styles.time}>⏱️ {foodItem.time}</Text>
+      </View>
+
+      {/* Footer Section */}
+      <View style={styles.footer}>
+        <View style={styles.priceQuantityContainer}>
+          <Text style={styles.price}>${foodItem.price}</Text>
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
+              <Text style={styles.quantityButtonText}>-</Text>
+            </TouchableOpacity>
+            <Text style={styles.quantityText}>{quantity}</Text>
+            <TouchableOpacity onPress={increaseQuantity} style={styles.quantityButton}>
+              <Text style={styles.quantityButtonText}>+</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Add to Cart Button */}
+        <TouchableOpacity onPress={handleAddToCart} style={styles.addToCartButton}>
+          <Text style={styles.addToCartText}>Add to Cart</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 20,
+    backgroundColor: "#FFF",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  imageContainer: {
+    position: "relative",
+    marginBottom: 20,
   },
   image: {
     width: "100%",
-    height: 250,
+    height: 200,
     borderRadius: 10,
   },
+  favoriteButton: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    backgroundColor: "#00000080",
+    borderRadius: 20,
+    padding: 5,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    marginVertical: 10,
+    marginBottom: 10,
+  },
+  description: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 10,
+  },
+  detailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
   },
   rating: {
-    fontSize: 18,
-    color: "gray",
-    paddingRight:10,
+    fontSize: 16,
+    color: "#888",
   },
   time: {
-    fontSize: 18,
-    color: "gray",
-    paddingLeft:10,
+    fontSize: 16,
+    color: "#888",
   },
-  category: {
-    fontSize: 18,
-    color: "gray",
+  footer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    paddingVertical: 20,
+  },
+  priceQuantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  price: {
+    fontSize: 22,
+    fontWeight: "bold",
   },
   quantityContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 20,
   },
   quantityButton: {
-    backgroundColor: "#ddd",
+    backgroundColor: "#F0F0F0",
     padding: 10,
     borderRadius: 5,
-    marginHorizontal: 55,
+    marginHorizontal: 10,
   },
   quantityButtonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  quantityText: {
-    fontSize: 20,
-  },
-  addToCartButton: {
-    backgroundColor: "#28a745",
-    padding: 15,
-    borderRadius: 5,
-    marginTop: 20,
-    alignItems: "center",
-  },
-  addToCartText: {
-    color: "white",
     fontSize: 18,
     fontWeight: "bold",
   },
-  detailsContainer: {
-    flexDirection: "row",  // This makes the text elements appear on the same line
-    paddingRight:10,
-    marginBottom: 10,  // Optional: add some space at the bottom
+  quantityText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  addToCartButton: {
+    backgroundColor: "#FF7622",
+    paddingVertical: 15,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  addToCartText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
