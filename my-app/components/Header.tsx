@@ -11,15 +11,12 @@ const Header: React.FC = () => {
   return (
     <View style={[GlobalStyles.row, styles.header]}>
       <TouchableOpacity>
-        <Text style={styles.menuIcon}>☰</Text>
+      <Image source={require('../app/assets/images/sidebar2.png')} style={styles.image2} />
       </TouchableOpacity>
       <Image source={require('../app/assets/images/Food.png')} style={styles.image} />
       
       <TouchableOpacity style={styles.cartIcon}>
-      <Ionicons
-        name="cart-outline"
-        size={30}
-        color="#FF7622"/>
+      <Image source={require('../app/assets/images/Carticon.png')} style={styles.image3} />
       </TouchableOpacity>
     </View>
   );
@@ -55,6 +52,16 @@ const styles = StyleSheet.create({
     width: 100, // Adjust width as needed
     height: 50, // Adjust height as needed
     resizeMode: "contain", // Ensures the image maintains its aspect ratio
+  },
+  image2: {
+    width: 50, // Adjust width as needed
+    height: 50, // Adjust height as needed
+    marginLeft:-2, // Ensures the image maintains its aspect ratio
+  },
+  image3: {
+    width: 40, // Adjust width as needed
+    height: 40, // Adjust height as needed
+    marginRight:-2, // Ensures the image maintains its aspect ratio
   },
 });
 
