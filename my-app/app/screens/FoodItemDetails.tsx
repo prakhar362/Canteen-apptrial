@@ -26,7 +26,7 @@ const FoodItemDetails: React.FC = () => {
       {/* Header with Back Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={24} color="#000" />
+          <Image source={require('../assets/images/Back.png')}/>
         </TouchableOpacity>
         <Text style={styles.headerText}>Details</Text>
       </View>

@@ -59,9 +59,9 @@ const styles = StyleSheet.create({
     marginLeft:-2, // Ensures the image maintains its aspect ratio
   },
   image3: {
-    width: 40, // Adjust width as needed
-    height: 40, // Adjust height as needed
-    marginRight:-2, // Ensures the image maintains its aspect ratio
+    width: 50, // Adjust width as needed
+    height: 50, // Adjust height as needed
+     // Ensures the image maintains its aspect ratio
   },
 });
 
