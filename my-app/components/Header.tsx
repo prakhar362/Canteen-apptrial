@@ -1,22 +1,23 @@
 // Header.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet ,Image} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import GlobalStyles from '@/styles/GlobalStyles';
 import { Ionicons } from '@expo/vector-icons';
 
+interface HeaderProps {
+  toggleSidebar: () => void;  // Added toggleSidebar function as a prop
+}
 
-
-
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   return (
     <View style={[GlobalStyles.row, styles.header]}>
-      <TouchableOpacity>
-      <Image source={require('../app/assets/images/sidebar2.png')} style={styles.image2} />
+      <TouchableOpacity onPress={toggleSidebar}>  {/* Add onPress event to open/close sidebar */}
+        <Image source={require('../app/assets/images/sidebar2.png')} style={styles.image2} />
       </TouchableOpacity>
       <Image source={require('../app/assets/images/Food.png')} style={styles.image} />
       
       <TouchableOpacity style={styles.cartIcon}>
-      <Image source={require('../app/assets/images/Carticon.png')} style={styles.image3} />
+        <Image source={require('../app/assets/images/Carticon.png')} style={styles.image3} />
       </TouchableOpacity>
     </View>
   );
@@ -56,14 +57,13 @@ const styles = StyleSheet.create({
   image2: {
     width: 50, // Adjust width as needed
     height: 50, // Adjust height as needed
-    marginLeft:-2, // Ensures the image maintains its aspect ratio
+    marginLeft: -2, // Ensures the image maintains its aspect ratio
   },
   image3: {
     width: 50, // Adjust width as needed
     height: 50, // Adjust height as needed
-     // Ensures the image maintains its aspect ratio
+    // Ensures the image maintains its aspect ratio
   },
 });
 
 export default Header;
-

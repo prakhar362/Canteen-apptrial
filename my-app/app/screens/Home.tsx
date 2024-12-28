@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet } from "react-native";
+import { View, ScrollView, StyleSheet,Button} from "react-native";
 // Home.tsx
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList, FoodItem } from '../navigation/AppNavigator'; // Corrected import
@@ -10,11 +10,12 @@ import ProductCard from "@/components/ProductCard";
 import GlobalStyles from "@/styles/GlobalStyles";
 import SearchBar from "@/components/SearchBar";
 import foodItems from "@/data/foodItem";
-
+import Sidebar from "@/components/Sidebar"; // Import Sidebar component
 
 const HomeScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); // State to manage sidebar visibility
 
   // Explicitly type the navigation
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -31,10 +32,20 @@ const HomeScreen: React.FC = () => {
     navigation.navigate("FoodItemDetails", { foodItem: item }); // Correctly typed
   };
 
+   // Function to toggle the sidebar
+   const toggleSidebar = () => {
+    setIsSidebarOpen((prevState) => !prevState);
+  };
+
   return (
+    <View style={{ flex: 1 }}>
+      {/* Sidebar component */}
+      <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} />
+
     <ScrollView style={GlobalStyles.container} keyboardShouldPersistTaps="handled">
+
       {/* Header */}
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
 
       {/* Search Bar */}
       <SearchBar
@@ -81,6 +92,7 @@ const HomeScreen: React.FC = () => {
         ))}
       </View>
     </ScrollView>
+    </View>
   );
 };
 
