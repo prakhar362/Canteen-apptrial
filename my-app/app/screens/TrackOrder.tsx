@@ -1,8 +1,37 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from "react-native";
+// TrackOrder.tsx
+import React, { useState } from "react";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  ScrollView, 
+  SafeAreaView
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import ReviewModal from "./Review";
 
 const TrackOrder = () => {
+  const [progress, setProgress] = useState(1);
+  const [showReview, setShowReview] = useState(false);
+
+  const handleReviewSubmit = (rating: number, comment: string) => {
+    console.log('Rating:', rating, 'Comment:', comment);
+    // Add your API call here to submit the review
+    setShowReview(false);
+  };
+
+  const handleProgress = (step: number) => {
+    const newProgress = Math.min(Math.max(progress + step, 1), 3);
+    setProgress(newProgress);
+
+    if (newProgress === 3) {
+      setTimeout(() => {
+        setShowReview(true);
+      }, 5000);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Fixed Header */}
@@ -43,17 +72,17 @@ const TrackOrder = () => {
             {/* Vertical Line */}
             <View style={styles.progressLineContainer}>
               <View style={styles.progressLine} />
-              <View style={styles.progressLineFilled} />
+              <View style={[styles.progressLineFilled, { height: `${(progress - 1) * 39}%` }]} />
             </View>
 
             {/* Status Points */}
             <View style={styles.statusPoints}>
               <View style={styles.statusPoint}>
-                <View style={[styles.point, styles.pointActive]}>
+                <View style={[styles.point, progress >= 1 && styles.pointActive]}>
                   <View style={styles.innerPoint} />
                 </View>
                 <View style={styles.statusTextContainer}>
-                  <Text style={[styles.statusText, styles.statusTextActive]}>
+                  <Text style={[styles.statusText, progress >= 1 && styles.statusTextActive]}>
                     Order received
                   </Text>
                   <Text style={styles.statusTime}>10:00 PM</Text>
@@ -61,11 +90,11 @@ const TrackOrder = () => {
               </View>
 
               <View style={styles.statusPoint}>
-                <View style={[styles.point, styles.pointActive]}>
+                <View style={[styles.point, progress >= 2 && styles.pointActive]}>
                   <View style={styles.innerPoint} />
                 </View>
                 <View style={styles.statusTextContainer}>
-                  <Text style={[styles.statusText, styles.statusTextActive]}>
+                  <Text style={[styles.statusText, progress >= 2 && styles.statusTextActive]}>
                     Preparing your food
                   </Text>
                   <Text style={styles.statusTime}>10:05 PM</Text>
@@ -73,21 +102,46 @@ const TrackOrder = () => {
               </View>
 
               <View style={styles.statusPoint}>
-                <View style={styles.point}>
+                <View style={[styles.point, progress >= 3 && styles.pointActive]}>
                   <View style={styles.innerPoint} />
                 </View>
                 <View style={styles.statusTextContainer}>
-                  <Text style={styles.statusText}>Ready for pickup</Text>
+                  <Text style={[styles.statusText, progress >= 3 && styles.statusTextActive]}>
+                    Ready for pickup
+                  </Text>
                   <Text style={styles.statusTime}>Expected 10:20 PM</Text>
                 </View>
               </View>
             </View>
           </View>
-          
+
+          {/* Action Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.yellowButton]}
+              onPress={() => handleProgress(1)}
+            >
+              <Text style={styles.buttonText}>Next Step</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.greenButton]}
+              onPress={() => handleProgress(2)}
+            >
+              <Text style={styles.buttonText}>Skip to Ready</Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Bottom Padding */}
           <View style={styles.bottomPadding} />
         </View>
       </ScrollView>
+
+      {/* Review Modal */}
+      <ReviewModal
+        visible={showReview}
+        onClose={() => setShowReview(false)}
+        onSubmit={handleReviewSubmit}
+      />
     </SafeAreaView>
   );
 };
@@ -131,7 +185,7 @@ const styles = StyleSheet.create({
     marginTop: -24,
     paddingHorizontal: 20,
     paddingTop: 20,
-    minHeight: 500, // Ensures enough space for content
+    minHeight: 500,
   },
   orderInfo: {
     marginBottom: 16,
@@ -190,7 +244,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: 46,
     backgroundColor: "#E9ECEF",
     borderRadius: 1.5,
   },
@@ -199,7 +253,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: "66%",
     backgroundColor: "#FF7622",
     borderRadius: 1.5,
   },
@@ -246,7 +299,28 @@ const styles = StyleSheet.create({
     color: "#6C757D",
   },
   bottomPadding: {
-    height: 40, // Adds extra padding at the bottom
+    height: 40,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  yellowButton: {
+    backgroundColor: "#FFC107",
+  },
+  greenButton: {
+    backgroundColor: "#28A745",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
