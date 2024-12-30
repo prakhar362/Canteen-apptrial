@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { RouteProp } from "@react-navigation/native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { RootStackParamList } from "../navigation/AppNavigator";
 
@@ -18,20 +17,24 @@ const FoodItemDetails: React.FC = () => {
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = () => {
-    console.log(`Added ${quantity} of ${foodItem.title} to the cart`);
+    const newCartItem = {
+      id: foodItem.id,
+      title: foodItem.title,
+      price: foodItem.price,
+      quantity, // Updated quantity
+    };
+    navigation.navigate("Cart", { cartItems: [newCartItem] });
   };
 
   return (
     <View style={styles.container}>
-      {/* Header with Back Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require('../assets/images/Back.png')}/>
+          <Text style={styles.backButton}>{"<"}</Text>
         </TouchableOpacity>
         <Text style={styles.headerText}>Details</Text>
       </View>
 
-      {/* Food Image */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: foodItem.imageUrl }} style={styles.image} />
         <TouchableOpacity style={styles.favoriteButton}>
@@ -39,7 +42,6 @@ const FoodItemDetails: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Food Details */}
       <Text style={styles.title}>{foodItem.title}</Text>
       <Text style={styles.description}>{foodItem.description}</Text>
 
@@ -48,10 +50,9 @@ const FoodItemDetails: React.FC = () => {
         <Text style={styles.time}>⏱️ {foodItem.time}</Text>
       </View>
 
-      {/* Footer Section */}
       <View style={styles.footer}>
         <View style={styles.priceQuantityContainer}>
-          <Text style={styles.price}>${foodItem.price}</Text>
+          <Text style={styles.price}>${foodItem.price.toFixed(2)}</Text>
           <View style={styles.quantityContainer}>
             <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
               <Text style={styles.quantityButtonText}>-</Text>
@@ -63,7 +64,6 @@ const FoodItemDetails: React.FC = () => {
           </View>
         </View>
 
-        {/* Add to Cart Button */}
         <TouchableOpacity onPress={handleAddToCart} style={styles.addToCartButton}>
           <Text style={styles.addToCartText}>Add to Cart</Text>
         </TouchableOpacity>
@@ -82,6 +82,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
+  },
+  backButton: {
+    color: "#000",
+    fontSize: 18,
   },
   headerText: {
     fontSize: 18,
@@ -129,15 +133,13 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   footer: {
-    flex: 1,
     justifyContent: "flex-end",
-    paddingVertical: 55,
-    marginTop:60,
+    marginTop: 60,
   },
   priceQuantityContainer: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   price: {

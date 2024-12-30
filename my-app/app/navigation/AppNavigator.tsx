@@ -9,6 +9,7 @@ import TrackOrder  from "../screens/TrackOrder";
 import PaymentSuccessful from "../screens/PaymentSuccessful";
 import Profile from "../screens/Profile";
 import Orders from '../screens/Orders';
+import Cart from "../screens/Cart";
 
 
 export type RootStackParamList = {
@@ -21,8 +22,10 @@ export type RootStackParamList = {
   PaymentSuccessful:undefined;
   Profile:undefined;
   Orders:undefined;
+  Cart: { cartItems: { id: string; title: string; price: number; quantity: number }[] };
 
 };
+
 
 export interface FoodItem {
   id: number;
@@ -62,6 +65,7 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen name="TrackOrder" component={TrackOrder} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="Orders" component={Orders} />
+          <Stack.Screen name="Cart" component={Cart} />
           
         </>
       )}
