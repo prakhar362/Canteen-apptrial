@@ -131,7 +131,8 @@ const styles = StyleSheet.create({
   footer: {
     flex: 1,
     justifyContent: "flex-end",
-    paddingVertical: 20,
+    paddingVertical: 55,
+    marginTop:60,
   },
   priceQuantityContainer: {
     flexDirection: "row",
