@@ -10,6 +10,7 @@ import PaymentSuccessful from "../screens/PaymentSuccessful";
 import Profile from "../screens/Profile";
 import Orders from '../screens/Orders';
 
+
 export type RootStackParamList = {
   Splash: undefined;
   LogIn: undefined;
@@ -20,6 +21,7 @@ export type RootStackParamList = {
   PaymentSuccessful:undefined;
   Profile:undefined;
   Orders:undefined;
+
 };
 
 export interface FoodItem {
@@ -60,6 +62,7 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen name="TrackOrder" component={TrackOrder} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="Orders" component={Orders} />
+          
         </>
       )}
     </Stack.Navigator>

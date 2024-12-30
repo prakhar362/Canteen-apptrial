@@ -6,12 +6,15 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   ScrollView, 
-  SafeAreaView
+  SafeAreaView,Image
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ReviewModal from "./Review";
+import { useNavigation } from "@react-navigation/native"; // Import navigation hook
+
 
 const TrackOrder = () => {
+  const navigation = useNavigation(); // Hook to access navigation
   const [progress, setProgress] = useState(1);
   const [showReview, setShowReview] = useState(false);
 
@@ -36,8 +39,11 @@ const TrackOrder = () => {
     <SafeAreaView style={styles.safeArea}>
       {/* Fixed Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Image 
+            source={require("../assets/images/Back.png")} 
+            style={styles.backImage} 
+          />
         </TouchableOpacity>
         <Text style={styles.headerText}>Track Order</Text>
       </View>
@@ -176,6 +182,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 200,
     backgroundColor: "#E9ECEF",
+  },
+  backImage: {
+    width: 45,
+    height: 45,
+    resizeMode: "contain",
   },
   mainContainer: {
     flex: 1,

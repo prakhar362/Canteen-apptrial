@@ -1,57 +1,43 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert,Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Image,
+} from "react-native";
 
-function Orders() {
-  const navigation = useNavigation();
-  const [selectedTab, setSelectedTab] = useState("ongoing"); // "ongoing" or "history"
-  const [ongoingOrders, setOngoingOrders] = useState([]);
-  const [orderHistory, setOrderHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
+// Mock Data
+const mockOngoingOrders = [
+  { id: "1", title: "Pizza", status: "Preparing", date: "2024-12-30" },
+  { id: "2", title: "Burger", status: "Out for Delivery", date: "2024-12-29" },
+];
 
-   //Fetch orders from the database
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        // Replace with your API call to fetch orders
-        const userId = "USER_ID"; // Replace with logged-in user's ID
-        const response = await fetch(`https://your-api.com/orders/${userId}`);
-        const data = await response.json();
+const mockHistoryOrders = [
+  { id: "3", title: "Pasta", status: "Delivered", date: "2024-12-28" },
+  { id: "4", title: "Sandwich", status: "Delivered", date: "2024-12-27" },
+];
 
-        // Separate ongoing orders and history
-        const ongoing = data.filter((order: any) => order.status === "ongoing");
-        const history = data.filter((order: any) => order.status === "completed");
+const Orders = ({ navigation }: any) => {
+  const [selectedSegment, setSelectedSegment] = useState("ongoing"); // Tracks whether "Ongoing" or "History" is selected
 
-        setOngoingOrders(ongoing);
-        setOrderHistory(history);
-        setLoading(false);
-      } catch (error) {
-        Alert.alert("Error", "Failed to fetch orders.");
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
-  // Render individual order item
-  const renderOrder = ({ item }: { item: any }) => (
-    <View style={styles.orderItem}>
-      <Text style={styles.orderTitle}>{item.title}</Text>
-      <Text style={styles.orderDetails}>{item.details}</Text>
-      <Text style={styles.orderStatus}>Status: {item.status}</Text>
-    </View>
-  );
-  
+  // Determine which data to show based on the selected segment
+  const data =
+    selectedSegment === "ongoing" ? mockOngoingOrders : mockHistoryOrders;
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Header Section */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require("../assets/images/Back.png")} />
+          <Image
+            source={require("../assets/images/Back.png")}
+            style={styles.backImage}
+          />
         </TouchableOpacity>
-        <Text style={styles.title}>My Orders</Text>
+        <Text style={styles.headerTitle}>Orders</Text>
+        <View style={{ width: 50 }} /> {/* Placeholder for alignment */}
       </View>
 
       {/* Segmented Control */}
@@ -59,14 +45,14 @@ function Orders() {
         <TouchableOpacity
           style={[
             styles.segmentButton,
-            selectedTab === "ongoing" && styles.activeSegment,
+            selectedSegment === "ongoing" && styles.activeSegment,
           ]}
-          onPress={() => setSelectedTab("ongoing")}
+          onPress={() => setSelectedSegment("ongoing")}
         >
           <Text
             style={[
               styles.segmentText,
-              selectedTab === "ongoing" && styles.activeSegmentText,
+              selectedSegment === "ongoing" && styles.activeSegmentText,
             ]}
           >
             Ongoing
@@ -75,123 +61,151 @@ function Orders() {
         <TouchableOpacity
           style={[
             styles.segmentButton,
-            selectedTab === "history" && styles.activeSegment,
+            selectedSegment === "history" && styles.activeSegment,
           ]}
-          onPress={() => setSelectedTab("history")}
+          onPress={() => setSelectedSegment("history")}
         >
           <Text
             style={[
               styles.segmentText,
-              selectedTab === "history" && styles.activeSegmentText,
+              selectedSegment === "history" && styles.activeSegmentText,
             ]}
           >
-            History
+            Completed
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Orders List */}
-      <View style={styles.orderList}>
-        {loading ? (
-          <Text style={styles.loadingText}>Loading...</Text>
-        ) : selectedTab === "ongoing" ? (
-          <FlatList
-            data={ongoingOrders}
-            renderItem={renderOrder}
-            keyExtractor={(item) => item.id.toString()}
-            ListEmptyComponent={<Text style={styles.emptyText}>No ongoing orders.</Text>}
-          />
-        ) : (
-          <FlatList
-            data={orderHistory}
-            renderItem={renderOrder}
-            keyExtractor={(item) => item.id.toString()}
-            ListEmptyComponent={<Text style={styles.emptyText}>No order history.</Text>}
-          />
+      <FlatList
+        data={data}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.orderCard}>
+            <Text style={styles.orderTitle}>{item.title}</Text>
+            <Text style={styles.orderStatus}>Status: {item.status}</Text>
+            <Text style={styles.orderDate}>Date: {item.date}</Text>
+            {selectedSegment === "ongoing" ? (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate("TrackOrder", { orderId: item.id })}
+              >
+                <Text style={styles.actionButtonText}>Track Order</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate("Review", { orderId: item.id })}
+              >
+                <Text style={styles.actionButtonText}>Rate</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
-      </View>
+        contentContainerStyle={{ paddingBottom: 20 }}
+        ListEmptyComponent={
+          <Text style={styles.placeholderText}>
+            No {selectedSegment === "ongoing" ? "ongoing" : "completed"} orders.
+          </Text>
+        }
+      />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f9f9f9",
-    padding: 20,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    justifyContent: "space-between",
+    padding: 20,
+    backgroundColor: "#fff",
+    elevation: 3, // Shadow for Android
+    shadowColor: "#000", // Shadow for iOS
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
-  backButton: {
-    fontSize: 16,
-    color: "#007BFF",
-    marginRight: 10,
+  backImage: {
+    width: 45,
+    height: 45,
+    resizeMode: "contain",
   },
-  title: {
+  headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    margin: 15,
-    paddingLeft:25,
+    color: "#333",
   },
   segmentedControl: {
     flexDirection: "row",
-    marginBottom: 20,
-    backgroundColor: "#eee",
-    borderRadius: 10,
-    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 15,
   },
   segmentButton: {
     flex: 1,
     paddingVertical: 10,
     alignItems: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
   },
   activeSegment: {
-    backgroundColor: "#007BFF",
+    borderBottomColor: "#007BFF",
   },
   segmentText: {
     fontSize: 16,
-    color: "#333",
+    color: "#666",
   },
   activeSegmentText: {
-    color: "#fff",
+    color: "#007BFF",
     fontWeight: "bold",
   },
-  orderList: {
-    flex: 1,
-  },
-  orderItem: {
+  orderCard: {
     backgroundColor: "#fff",
+    marginHorizontal: 20,
+    marginBottom: 10,
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
     elevation: 3,
   },
   orderTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 5,
-  },
-  orderDetails: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 5,
+    color: "#333",
   },
   orderStatus: {
     fontSize: 14,
-    color: "#007BFF",
+    color: "#666",
+    marginTop: 5,
   },
-  loadingText: {
-    fontSize: 16,
-    color: "#555",
-    textAlign: "center",
+  orderDate: {
+    fontSize: 12,
+    color: "#aaa",
+    marginTop: 5,
   },
-  emptyText: {
+  actionButton: {
+    marginTop: 10,
+    backgroundColor: "#007BFF",
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  placeholderText: {
     fontSize: 16,
-    color: "#999",
+    color: "#666",
     textAlign: "center",
+    marginTop: 50,
   },
 });
 
