@@ -7,6 +7,8 @@ import Home from "../screens/Home";
 import FoodItemDetails from "../screens/FoodItemDetails"; // Import the details screen
 import TrackOrder  from "../screens/TrackOrder";
 import PaymentSuccessful from "../screens/PaymentSuccessful";
+import Profile from "../screens/Profile";
+import Orders from '../screens/Orders';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -16,6 +18,8 @@ export type RootStackParamList = {
   FoodItemDetails: { foodItem: FoodItem }; // foodItem must be passed
   TrackOrder:undefined;
   PaymentSuccessful:undefined;
+  Profile:undefined;
+  Orders:undefined;
 };
 
 export interface FoodItem {
@@ -54,6 +58,8 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen name="FoodItemDetails" component={FoodItemDetails} />
           <Stack.Screen name="PaymentSuccessful" component={PaymentSuccessful} />
           <Stack.Screen name="TrackOrder" component={TrackOrder} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="Orders" component={Orders} />
         </>
       )}
     </Stack.Navigator>
