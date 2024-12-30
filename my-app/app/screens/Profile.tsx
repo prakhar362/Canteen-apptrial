@@ -216,8 +216,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   icon: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     marginRight: 10,
   },
   label: {
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 3,
     paddingVertical: 8,
   },
 });
