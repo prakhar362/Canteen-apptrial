@@ -7,28 +7,50 @@ import {
   FlatList,
   Image,
 } from "react-native";
-
-// Mock Data
-const mockOngoingOrders = [
-  { id: "1", title: "Pizza", status: "Preparing", date: "2024-12-30" },
-  { id: "2", title: "Burger", status: "Out for Delivery", date: "2024-12-29" },
-];
+import ReviewModal from "./Review";
 
 const mockHistoryOrders = [
-  { id: "3", title: "Pasta", status: "Delivered", date: "2024-12-28" },
-  { id: "4", title: "Sandwich", status: "Delivered", date: "2024-12-27" },
+  { id: "3", title: "Pasta", status: "Delivered", date: "2024-12-28", token: "A123" },
+  { id: "4", title: "Sandwich", status: "Delivered", date: "2024-12-27", token: "A124" },
 ];
 
 const Orders = ({ navigation }: any) => {
-  const [selectedSegment, setSelectedSegment] = useState("ongoing"); // Tracks whether "Ongoing" or "History" is selected
+  const [selectedSegment, setSelectedSegment] = useState("ongoing");
+  const [isReviewModalVisible, setReviewModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Determine which data to show based on the selected segment
+  const mockOngoingOrders = [
+    { id: "1", title: "Pizza", status: "Preparing", date: "2024-12-30", token: "A125" },
+    { id: "2", title: "Burger", status: "Out for Delivery", date: "2024-12-29", token: "A126" },
+  ];
+
   const data =
     selectedSegment === "ongoing" ? mockOngoingOrders : mockHistoryOrders;
 
+  const handleOpenReview = (order: any) => {
+    setSelectedOrder(order);
+    setReviewModalVisible(true);
+  };
+
+  const handleReviewSubmit = (rating: number, comment: string) => {
+    console.log("Order:", selectedOrder);
+    console.log("Rating:", rating, "Comment:", comment);
+    setReviewModalVisible(false);
+  };
+
+  const handleCancelOrder = (orderId: string) => {
+    console.log("Cancelling order:", orderId);
+    // Add your cancel order logic here
+  };
+
+  const handleReorder = (order: any) => {
+    console.log("Reordering:", order);
+    // Add your reorder logic here
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header Section */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
@@ -37,7 +59,6 @@ const Orders = ({ navigation }: any) => {
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Orders</Text>
-        <View style={{ width: 50 }} /> {/* Placeholder for alignment */}
       </View>
 
       {/* Segmented Control */}
@@ -82,23 +103,44 @@ const Orders = ({ navigation }: any) => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.orderCard}>
-            <Text style={styles.orderTitle}>{item.title}</Text>
+            <View style={styles.orderHeader}>
+              <Text style={styles.orderTitle}>{item.title}</Text>
+              <Text style={styles.tokenNumber}>#{item.token}</Text>
+            </View>
             <Text style={styles.orderStatus}>Status: {item.status}</Text>
             <Text style={styles.orderDate}>Date: {item.date}</Text>
             {selectedSegment === "ongoing" ? (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => navigation.navigate("TrackOrder", { orderId: item.id })}
-              >
-                <Text style={styles.actionButtonText}>Track Order</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.trackButton}
+                  onPress={() =>
+                    navigation.navigate("TrackOrder", { orderId: item.id })
+                  }
+                >
+                  <Text style={styles.actionButtonText}>Track Order</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => handleCancelOrder(item.id)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             ) : (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => navigation.navigate("Review", { orderId: item.id })}
-              >
-                <Text style={styles.actionButtonText}>Rate</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.rateButton}
+                  onPress={() => handleOpenReview(item)}
+                >
+                  <Text style={styles.actionButtonText}>Rate</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.reorderButton}
+                  onPress={() => handleReorder(item)}
+                >
+                  <Text style={styles.reorderButtonText}>Reorder</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         )}
@@ -108,6 +150,13 @@ const Orders = ({ navigation }: any) => {
             No {selectedSegment === "ongoing" ? "ongoing" : "completed"} orders.
           </Text>
         }
+      />
+
+      {/* Review Modal */}
+      <ReviewModal
+        visible={isReviewModalVisible}
+        onClose={() => setReviewModalVisible(false)}
+        onSubmit={handleReviewSubmit}
       />
     </View>
   );
@@ -124,10 +173,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 20,
     backgroundColor: "#fff",
-    elevation: 3, // Shadow for Android
-    shadowColor: "#000", // Shadow for iOS
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    elevation: 3,
   },
   backImage: {
     width: 45,
@@ -153,14 +199,14 @@ const styles = StyleSheet.create({
     borderBottomColor: "transparent",
   },
   activeSegment: {
-    borderBottomColor: "#007BFF",
+    borderBottomColor: "#FF7622",
   },
   segmentText: {
     fontSize: 16,
     color: "#666",
   },
   activeSegmentText: {
-    color: "#007BFF",
+    color: "#FF7622",
     fontWeight: "bold",
   },
   orderCard: {
@@ -174,10 +220,20 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
+  orderHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   orderTitle: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
+  },
+  tokenNumber: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#FF7622",
   },
   orderStatus: {
     fontSize: 14,
@@ -189,15 +245,56 @@ const styles = StyleSheet.create({
     color: "#aaa",
     marginTop: 5,
   },
-  actionButton: {
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 10,
-    backgroundColor: "#007BFF",
+    gap: 10,
+  },
+  trackButton: {
+    flex: 1,
+    backgroundColor: "#FF7622",
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: "center",
   },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FF7622",
+  },
+  rateButton: {
+    flex: 1,
+    backgroundColor: "#FF7622",
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  reorderButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FF7622",
+  },
   actionButtonText: {
     color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  cancelButtonText: {
+    color: "#FF7622",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  reorderButtonText: {
+    color: "#FF7622",
     fontWeight: "bold",
     fontSize: 14,
   },
