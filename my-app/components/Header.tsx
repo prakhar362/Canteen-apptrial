@@ -1,23 +1,37 @@
-// Header.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image, Text } from 'react-native';
 import GlobalStyles from '@/styles/GlobalStyles';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../app/navigation/AppNavigator' // Update with the correct path
 
 interface HeaderProps {
-  toggleSidebar: () => void;  // Added toggleSidebar function as a prop
+  toggleSidebar: () => void; // Sidebar toggle function
 }
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Navigation hook
+
+  const handleCartPress = () => {
+    navigation.navigate("Cart"); // Replace 'Cart' with the name of your cart page route
+  };
+
   return (
     <View style={[GlobalStyles.row, styles.header]}>
-      <TouchableOpacity onPress={toggleSidebar}>  {/* Add onPress event to open/close sidebar */}
+      {/* Sidebar Icon */}
+      <TouchableOpacity onPress={toggleSidebar}>
         <Image source={require('../app/assets/images/sidebar2.png')} style={styles.image2} />
       </TouchableOpacity>
+
+      {/* Logo */}
       <Image source={require('../app/assets/images/Food.png')} style={styles.image} />
-      
-      <TouchableOpacity style={styles.cartIcon}>
-        <Image source={require('../app/assets/images/Carticon.png')} style={styles.image3} />
+
+      {/* Cart Icon */}
+      <TouchableOpacity style={styles.cartContainer} onPress={handleCartPress}>
+        <Ionicons name="cart" size={39} color="#000" />
+        <View style={styles.cartBadge}>
+          <Text style={styles.cartCount}>3</Text> {/* Static count */}
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -26,43 +40,40 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 const styles = StyleSheet.create({
   header: {
     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 0,
     marginBottom: 16,
   },
-  menuIcon: {
-    fontSize: 24,
+  image: {
+    width: 100,
+    height: 50,
+    resizeMode: 'contain',
   },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FF6600',
+  image2: {
+    width: 48,
+    height: 48,
+    marginLeft: -2,
   },
-  cartIcon: {
+  cartContainer: {
     position: 'relative',
+    marginTop: 6,
+    marginRight: 5,
   },
   cartBadge: {
     position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#FF0000',
-    color: '#fff',
+    top: 1,
+    right: -4,
+    backgroundColor: 'red',
     borderRadius: 10,
-    paddingHorizontal: 6,
-    fontSize: 12,
+    width: 17,
+    height: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  image: {
-    width: 100, // Adjust width as needed
-    height: 50, // Adjust height as needed
-    resizeMode: "contain", // Ensures the image maintains its aspect ratio
-  },
-  image2: {
-    width: 50, // Adjust width as needed
-    height: 50, // Adjust height as needed
-    marginLeft: -2, // Ensures the image maintains its aspect ratio
-  },
-  image3: {
-    width: 50, // Adjust width as needed
-    height: 50, // Adjust height as needed
-    // Ensures the image maintains its aspect ratio
+  cartCount: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
 });
 

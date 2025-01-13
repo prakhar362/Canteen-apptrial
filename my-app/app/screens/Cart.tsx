@@ -8,7 +8,7 @@ type CartScreenRouteProp = RouteProp<RootStackParamList, "Cart">;
 
 const CartScreen: React.FC = () => {
   const route = useRoute<CartScreenRouteProp>();
-  const { cartItems } = route.params;
+  const { cartItems } = route.params || { cartItems: [] };
 
   const [cart, setCart] = useState(cartItems);
   const navigation = useNavigation(); // Initialize the navigation hook
