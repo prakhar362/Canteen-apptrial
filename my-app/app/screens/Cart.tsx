@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: "#000000",
-    fontSize: 20,
+    fontSize: 22,
   },
   headerTitle: {
     color: "#000000",
