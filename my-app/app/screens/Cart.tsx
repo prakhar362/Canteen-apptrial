@@ -191,7 +191,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF4444",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
+    marginBottom: 9,
+    paddingBottom:5,
   },
   removeButtonText: {
     color: "#FFFFFF",
