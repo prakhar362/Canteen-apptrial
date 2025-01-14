@@ -3,7 +3,8 @@ import { View, TouchableOpacity, StyleSheet, Image, Text } from 'react-native';
 import GlobalStyles from '@/styles/GlobalStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../app/navigation/AppNavigator' // Update with the correct path
+import { RootStackParamList } from '../app/navigation/AppNavigator'; // Update with the correct path
+import { useCart } from '../app/context/CartContext'; // Import the Cart context
 
 interface HeaderProps {
   toggleSidebar: () => void; // Sidebar toggle function
@@ -11,10 +12,13 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Navigation hook
+  const { cartItems } = useCart(); // Get cart items from context
 
   const handleCartPress = () => {
-    navigation.navigate("Cart"); // Replace 'Cart' with the name of your cart page route
+    navigation.navigate('Cart'); // Navigate to cart page
   };
+
+  const cartItemCount = cartItems.reduce((count, item) => count + item.quantity, 0); // Calculate the total number of items
 
   return (
     <View style={[GlobalStyles.row, styles.header]}>
@@ -30,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       <TouchableOpacity style={styles.cartContainer} onPress={handleCartPress}>
         <Ionicons name="cart" size={39} color="#000" />
         <View style={styles.cartBadge}>
-          <Text style={styles.cartCount}>3</Text> {/* Static count */}
+          <Text style={styles.cartCount}>{cartItemCount}</Text> {/* Dynamic cart count */}
         </View>
       </TouchableOpacity>
     </View>

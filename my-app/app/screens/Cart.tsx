@@ -1,45 +1,27 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../navigation/AppNavigator";
-import { useNavigation } from "@react-navigation/native"; // Import the hook
-
-type CartScreenRouteProp = RouteProp<RootStackParamList, "Cart">;
+import React from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useCart } from "../context/CartContext";
 
 const CartScreen: React.FC = () => {
-  const route = useRoute<CartScreenRouteProp>();
-  const { cartItems } = route.params || { cartItems: [] };
-
-  const [cart, setCart] = useState(cartItems);
-  const navigation = useNavigation(); // Initialize the navigation hook
-
-  const handleRemoveItem = (id: string) => {
-    setCart(cart.filter((item: { id: string }) => item.id !== id));
-  };
-
-  const handleQuantityChange = (id: string, change: number) => {
-    setCart(
-      cart.map((item: any) => {
-        if (item.id === id) {
-          const newQuantity = Math.max(1, item.quantity + change);
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      })
-    );
-  };
+  const { cartItems, updateQuantity, removeFromCart } = useCart();
+  const navigation = useNavigation();
 
   const calculateTotal = () =>
-    cart.reduce(
-      (total: number, item: { price: number; quantity: number }) =>
-        total + item.price * item.quantity,
+    cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
       0
     );
 
   const renderCartItem = ({ item }: any) => (
     <View style={styles.cartItem}>
       <View style={styles.itemImageContainer}>
-        {/* Placeholder for item image */}
         <View style={styles.itemImage} />
       </View>
       <View style={styles.itemDetails}>
@@ -48,20 +30,23 @@ const CartScreen: React.FC = () => {
         <Text style={styles.itemPrice}>${item.price}</Text>
       </View>
       <View style={styles.rightContainer}>
-        <TouchableOpacity onPress={() => handleRemoveItem(item.id)} style={styles.removeButton}>
+        <TouchableOpacity
+          onPress={() => removeFromCart(item.id)}
+          style={styles.removeButton}
+        >
           <Text style={styles.removeButtonText}>×</Text>
         </TouchableOpacity>
         <View style={styles.quantityContainer}>
           <TouchableOpacity
             style={styles.quantityButton}
-            onPress={() => handleQuantityChange(item.id, -1)}
+            onPress={() => updateQuantity(item.id, item.quantity - 1)}
           >
             <Text style={styles.quantityButtonText}>−</Text>
           </TouchableOpacity>
           <Text style={styles.itemQuantity}>{item.quantity}</Text>
           <TouchableOpacity
             style={styles.quantityButton}
-            onPress={() => handleQuantityChange(item.id, 1)}
+            onPress={() => updateQuantity(item.id, item.quantity + 1)}
           >
             <Text style={styles.quantityButtonText}>+</Text>
           </TouchableOpacity>
@@ -79,11 +64,12 @@ const CartScreen: React.FC = () => {
         <Text style={styles.headerTitle}>Cart</Text>
       </View>
       <FlatList
-        data={cart}
-        renderItem={renderCartItem}
-        keyExtractor={(item) => item.id}
-        style={styles.cartList}
-      />
+  data={cartItems}
+  renderItem={renderCartItem}
+  keyExtractor={(item) => item.id.toString()} // Convert ID to string
+  style={styles.cartList}
+/>
+
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>TOTAL:</Text>
@@ -192,7 +178,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 9,
-    paddingBottom:5,
+    paddingBottom: 5,
   },
   removeButtonText: {
     color: "#FFFFFF",

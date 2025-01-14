@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { RootStackParamList } from "../navigation/AppNavigator";
-
+import { useCart } from "../context/CartContext";
 type FoodItemDetailsRouteProp = RouteProp<RootStackParamList, "FoodItemDetails">;
 
 const FoodItemDetails: React.FC = () => {
@@ -11,6 +11,7 @@ const FoodItemDetails: React.FC = () => {
   const navigation = useNavigation();
   const { foodItem } = route.params;
 
+  const { addToCart } = useCart(); // Access the addToCart function from the context
   const [quantity, setQuantity] = useState<number>(1);
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
@@ -23,7 +24,9 @@ const FoodItemDetails: React.FC = () => {
       price: foodItem.price,
       quantity, // Updated quantity
     };
-    navigation.navigate("Cart", { cartItems: [newCartItem] });
+    //navigation.navigate("Cart", { cartItems: [newCartItem] });
+    addToCart(newCartItem); // Add item to the cart
+    navigation.navigate("Cart"); // Navigate to the Cart page
   };
 
   return (
