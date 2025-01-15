@@ -10,7 +10,7 @@ import PaymentSuccessful from "../screens/PaymentSuccessful";
 import Profile from "../screens/Profile";
 import Orders from '../screens/Orders';
 import Cart from "../screens/Cart";
-
+import { VerificationScreen,ForgotPasswordScreen } from "../screens/ForgetPass";
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -23,7 +23,8 @@ export type RootStackParamList = {
   Profile:undefined;
   Orders:undefined;
   Cart: { cartItems: { id: string; title: string; price: number; quantity: number }[] };
-
+  ForgotPassword: undefined;
+  Verification:{ email: string };
 };
 
 
@@ -66,7 +67,8 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="Orders" component={Orders} />
           <Stack.Screen name="Cart" component={Cart} />
-          
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="Verification" component={VerificationScreen} />
         </>
       )}
     </Stack.Navigator>

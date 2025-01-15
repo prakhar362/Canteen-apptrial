@@ -16,6 +16,7 @@ type RootStackParamList = {
   LogIn: undefined;
   Signup: undefined;
   Home: undefined;
+  forgotpassword: undefined;
 };
 
 type LogInScreenNavigationProp = StackNavigationProp<
@@ -104,7 +105,7 @@ const SignIn: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity className="relative top-1 -right-1/4">
+      <TouchableOpacity className="relative top-1 -right-1/4" onPress={() => navigation.navigate("ForgotPassword")}>
         <Text className="text-orange-500 text-sm">Forgot Password?</Text>
       </TouchableOpacity>
 
