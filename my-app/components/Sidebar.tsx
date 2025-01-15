@@ -40,8 +40,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <TouchableOpacity onPress={() => handleNavigation("Profile")}>
           <Text style={styles.menuItem}>Profile</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity onPress={onClose}>
+        <TouchableOpacity onPress={() => handleNavigation("ContactUs")}>
+          <Text style={styles.menuItem}>Contact us</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleNavigation("LogIn")}>
           <Text style={styles.menuItem}>Logout</Text>
         </TouchableOpacity>
       </View>
