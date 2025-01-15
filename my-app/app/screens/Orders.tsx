@@ -170,7 +170,6 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     padding: 20,
     backgroundColor: "#fff",
     elevation: 3,
@@ -184,6 +183,8 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#333",
+    marginLeft:10,
+    
   },
   segmentedControl: {
     flexDirection: "row",
