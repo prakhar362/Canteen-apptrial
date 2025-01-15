@@ -39,14 +39,19 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  // Update quantity of an item
   const updateQuantity = (id: number, quantity: number) => {
-    setCartItems((prev) =>
-      prev.map((cartItem) =>
+    setCartItems((prev) => {
+      if (quantity <= 0) {
+        // Automatically remove the item if quantity is 0 or less
+        return prev.filter((cartItem) => cartItem.id !== id);
+      }
+      // Update the quantity otherwise
+      return prev.map((cartItem) =>
         cartItem.id === id ? { ...cartItem, quantity } : cartItem
-      )
-    );
+      );
+    });
   };
+  
 
   // Remove item from the cart
   const removeFromCart = (id: number) => {
