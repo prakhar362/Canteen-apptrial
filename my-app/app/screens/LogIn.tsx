@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 import { StackNavigationProp } from "@react-navigation/stack";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Define the navigation type
 type RootStackParamList = {
@@ -49,6 +50,11 @@ const SignIn: React.FC = () => {
       const data = await response.json();
       console.log(data);
       if(data.success && data.user){
+          // Save the token securely using AsyncStorage
+          await AsyncStorage.setItem("userToken", data.user.re);
+          // Confirm addition
+      const addedToken = await AsyncStorage.getItem("userToken");
+      console.log("After adding, Token:", addedToken); // Should log `null
         navigation.navigate("Home");
       }
     }

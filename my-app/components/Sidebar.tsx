@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { RootStackParamList } from "../app/navigation/AppNavigator"; // Import the types for navigation
 import type { StackNavigationProp } from "@react-navigation/stack";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -32,6 +33,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             }
         });
         if (response.ok) {
+            // Clear the token from AsyncStorage
+      await AsyncStorage.removeItem("userToken");
+      console.log("Token removed from storage");
+      // Confirm removal
+      const removedToken = await AsyncStorage.getItem("userToken");
+      console.log("After removal, Token:", removedToken); // Should log `null
             console.log('Logout successful');
             handleNavigation('LogIn'); // Navigate to the login screen
         } else {
