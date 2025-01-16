@@ -1,29 +1,72 @@
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList, FoodItem } from '../navigation/AppNavigator';
+import { RootStackParamList, FoodItem } from '../navigation/AppNavigator';  // Imported interface here
 
 import Header from '@/components/Header';
 import CategoryCard from '@/components/CategoryCard';
 import ProductCard from '@/components/ProductCard';
 import GlobalStyles from '@/styles/GlobalStyles';
 import SearchBar from '@/components/SearchBar';
-import foodItems from '@/data/foodItem';
 import Sidebar from '@/components/Sidebar';
 
 const HomeScreen: React.FC = () => {
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [filteredFoodItems, setFilteredFoodItems] = useState<FoodItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const filteredFoodItems = foodItems.filter((item: FoodItem) => {
-    const matchesCategory =
-      selectedCategory === 'All' || item.category === selectedCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Fetch food items from the backend
+  useEffect(() => {
+    const fetchFoodItems = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/app/api/v1/fooditem', { // Replace with actual IP address if needed
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch food items');
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          console.log('Get request was successful');
+          console.log(data);
+          setFoodItems(data.data); // Set fetched food items
+          setFilteredFoodItems(data.data); // Initialize filtered items
+        } else {
+          Alert.alert('Error', 'Unable to fetch food items');
+        }
+      } catch (error) {
+        console.error('Error fetching food items:', error);
+        Alert.alert('Error', 'An error occurred while fetching food items.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFoodItems();
+  }, []);
+
+  // Filter food items based on category and search term
+  useEffect(() => {
+    const filtered = foodItems.filter((item: FoodItem) => {
+      const matchesCategory =
+        selectedCategory === 'All' || item.category === selectedCategory;
+      const matchesSearch = item.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()); // Use 'name' from backend
+      return matchesCategory && matchesSearch;
+    });
+    setFilteredFoodItems(filtered);
+  }, [selectedCategory, searchTerm, foodItems]);
 
   const handleFoodItemPress = (item: FoodItem) => {
     navigation.navigate('FoodItemDetails', { foodItem: item });
@@ -32,6 +75,18 @@ const HomeScreen: React.FC = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };
+
+  if (loading) {
+    return (
+      <View style={[GlobalStyles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading food items...</Text> {/* Optional loading text */}
+      </View>
+    );
+  }
+
+  // Dynamically generate categories from food items
+  const categories = Array.from(new Set(foodItems.map((item) => item.category)));
 
   return (
     <View style={{ flex: 1 }}>
@@ -63,32 +118,25 @@ const HomeScreen: React.FC = () => {
             active={selectedCategory === 'All'}
             onPress={() => setSelectedCategory('All')}
           />
-          <CategoryCard
-            title="Chinese"
-            active={selectedCategory === 'Chinese'}
-            onPress={() => setSelectedCategory('Chinese')}
-          />
-          <CategoryCard
-            title="South Indian"
-            active={selectedCategory === 'South Indian'}
-            onPress={() => setSelectedCategory('South Indian')}
-          />
-          <CategoryCard
-            title="Indian"
-            active={selectedCategory === 'Indian'}
-            onPress={() => setSelectedCategory('Indian')}
-          />
+          {categories.map((category) => (
+            <CategoryCard
+              key={category}
+              title={category}
+              active={selectedCategory === category}
+              onPress={() => setSelectedCategory(category)}
+            />
+          ))}
         </ScrollView>
 
         {/* Food List */}
         <View style={styles.foodGrid}>
           {filteredFoodItems.map((item: FoodItem) => (
             <ProductCard
-              key={item.id}
-              title={item.title}
+              key={item._id} // Use _id from the backend response
+              title={item.name} // Match field names with backend
               rating={item.rating}
-              time={item.time}
-              imageUrl={item.imageUrl}
+              time={item.time} // Ensure 'time' is available in backend data
+              imageUrl={item.img} // Ensure 'image' is available in backend data
               onPress={() => handleFoodItemPress(item)}
             />
           ))}
@@ -108,6 +156,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

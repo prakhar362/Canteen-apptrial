@@ -31,14 +31,11 @@ export type RootStackParamList = {
 
 
 export interface FoodItem {
-  id: number;
-  title: string;
-  rating: number;
-  time: string;
-  imageUrl: string;
+  _id: string;
+  name: string;
+  price: number;
   category: string;
-  price:number;
-  description:string;
+  rating: number;
 }
 
 const Stack = createStackNavigator<RootStackParamList>();
