@@ -23,6 +23,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     onClose(); // Close the sidebar after navigating
   };
 
+  const handleLogout = async () => {
+    try {
+        const response = await fetch("http://localhost:5000/api/v1/auth/logout", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+        });
+        if (response.ok) {
+            console.log('Logout successful');
+            handleNavigation('LogIn'); // Navigate to the login screen
+        } else {
+            console.error('Logout failed:', await response.text());
+        }
+    } catch (error) {
+        console.error('Logout failed:', error);
+        // Handle error (e.g., show an error message to the user)
+    }
+};
   return (
     <View style={styles.sidebarContainer}>
       <View style={styles.sidebar}>
@@ -43,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <TouchableOpacity onPress={() => handleNavigation("ContactUs")}>
           <Text style={styles.menuItem}>Contact us</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleNavigation("LogIn")}>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.menuItem}>Logout</Text>
         </TouchableOpacity>
       </View>
