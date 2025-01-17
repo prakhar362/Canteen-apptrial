@@ -37,8 +37,6 @@ const HomeScreen: React.FC = () => {
 
         const data = await response.json();
         if (data.success) {
-          console.log('Get request was successful');
-          console.log(data);
           setFoodItems(data.data); // Set fetched food items
           setFilteredFoodItems(data.data); // Initialize filtered items
         } else {

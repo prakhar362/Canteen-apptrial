@@ -46,15 +46,12 @@ const SignIn: React.FC = () => {
         },
         body: JSON.stringify({ ...form }),
       });
-      // console.log(response);
       const data = await response.json();
-      console.log(data);
       if(data.success && data.user){
           // Save the token securely using AsyncStorage
           await AsyncStorage.setItem("userToken", data.user.re);
           // Confirm addition
       const addedToken = await AsyncStorage.getItem("userToken");
-      console.log("After adding, Token:", addedToken); // Should log `null
         navigation.navigate("Home");
       }
     }

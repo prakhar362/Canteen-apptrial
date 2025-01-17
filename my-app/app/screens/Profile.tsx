@@ -19,7 +19,7 @@ type RootStackParamList = {
 type ProfilePageProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
-  const [name, setName] = useState("");
+  const [username, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
@@ -34,7 +34,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
 
           return;
         }
-
+        
         const response = await fetch("http://localhost:5000/app/api/v1/profile", {
           method: "GET",
           headers: {
@@ -69,13 +69,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/app/api/v1/auth/profile", {
+      const response = await fetch("http://localhost:5000/app/api/v1/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, phone, email, bio }),
+        body: JSON.stringify({ username, phone, email, bio }),
       });
 
       if (!response.ok) {
@@ -107,12 +107,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
       <View style={styles.profileHeader}>
         <View style={styles.profileImageContainer}>
           <Image
-            source={require("../assets/images/ProfilePic.png")}
+            source={require("../assets/images/default_profile_pic.png")}
             style={styles.profileImage}
           />
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{name}</Text>
+          <Text style={styles.profileName}>{username}</Text>
           {isEditing ? (
             <TextInput
               style={styles.bioInput}
@@ -132,12 +132,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
           {isEditing ? (
             <TextInput
               style={styles.input}
-              value={name}
+              value={username}
               onChangeText={setName}
               placeholder="Enter your name"
             />
           ) : (
-            <Text style={styles.text}>{name}</Text>
+            <Text style={styles.text}>{username}</Text>
           )}
         </View>
         <View style={styles.inputGroup}>
