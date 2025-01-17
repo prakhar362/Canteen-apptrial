@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,47 +9,101 @@ import {
   Image,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Define the stack's navigation prop
 type RootStackParamList = {
-  Home: undefined; // Replace with your actual route names
+  Home: undefined;
   Profile: undefined;
 };
 
 type ProfilePageProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
-  // State variables for user details
-  const [name, setName] = useState("John Doe");
-  const [phone, setPhone] = useState("123-456-7890");
-  const [email, setEmail] = useState("john.doe@example.com");
-  const [bio, setBio] = useState("I love Fast Food");
-  // State to track if the page is in edit mode
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
-  // Handle saving updated details
-  const handleSave = () => {
-    setIsEditing(false); // Exit edit mode
-    Alert.alert("Profile Updated", "Your details have been successfully updated!");
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (!token) {
+          Alert.alert("Error", "No token found. Please log in again.");
+
+          return;
+        }
+
+        const response = await fetch("http://localhost:5000/app/api/v1/profile", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch profile data");
+        }
+
+        const data = await response.json();
+        setName(data.username);
+        setPhone(data.phone);
+        setEmail(data.email);
+        setBio(data.bio);
+      } catch (error) {
+        console.error(error);
+        Alert.alert("Error", "Failed to load profile data.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) {
+        Alert.alert("Error", "No token found. Please log in again.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/app/api/v1/auth/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, phone, email, bio }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      setIsEditing(false);
+      Alert.alert("Success", "Profile updated successfully!");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to update profile.");
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Header Section */}
       <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Image source={require("../assets/images/Back.png")} />
         </TouchableOpacity>
         <Text style={styles.title}>Personal Info</Text>
         <TouchableOpacity
-          onPress={() => setIsEditing(!isEditing)}
+          onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
           style={styles.editButton}
         >
           <Text style={styles.editButtonText}>{isEditing ? "Save" : "Edit"}</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Profile Header */}
       <View style={styles.profileHeader}>
         <View style={styles.profileImageContainer}>
           <Image
@@ -71,15 +125,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
           )}
         </View>
       </View>
-
-      {/* Profile Details */}
       <View style={styles.profileDetails}>
-        {/* Name */}
         <View style={styles.inputGroup}>
-          <Image
-            source={require("../assets/images/Name.png")}
-            style={styles.icon}
-          />
+          <Image source={require("../assets/images/Name.png")} style={styles.icon} />
           <Text style={styles.label}>NAME:</Text>
           {isEditing ? (
             <TextInput
@@ -92,13 +140,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
             <Text style={styles.text}>{name}</Text>
           )}
         </View>
-
-        {/* Phone Number */}
         <View style={styles.inputGroup}>
-          <Image
-            source={require("../assets/images/Phone.png")}
-            style={styles.icon}
-          />
+          <Image source={require("../assets/images/Phone.png")} style={styles.icon} />
           <Text style={styles.label}>PHONE:</Text>
           {isEditing ? (
             <TextInput
@@ -112,13 +155,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
             <Text style={styles.text}>{phone}</Text>
           )}
         </View>
-
-        {/* Email */}
         <View style={styles.inputGroup}>
-          <Image
-            source={require("../assets/images/Email.png")}
-            style={styles.icon}
-          />
+          <Image source={require("../assets/images/Email.png")} style={styles.icon} />
           <Text style={styles.label}>EMAIL:</Text>
           {isEditing ? (
             <TextInput
@@ -137,7 +175,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
