@@ -16,6 +16,7 @@ const Signup = () => {
   const [form, setForm] = useState({
     username: "",
     email: "",
+    phoneNumber:"",
     password: "",
     confirmPassword: "",
   });
@@ -36,8 +37,9 @@ const Signup = () => {
         body: JSON.stringify({...form})
       })
       console.log(response)
+      console.log({...form});
       const data=await response.json();
-      console.log(data)
+      console.log("Data being sent to B.E:",{...form})
     }
   };
 
@@ -74,6 +76,14 @@ const Signup = () => {
         keyboardType="email-address"
         value={form.email}
         onChangeText={(e) => setForm({ ...form, email: e })}
+      />
+      {/* Phone Number */}
+      <TextInput
+        className="bg-gray-200 p-3 rounded-md mb-4 w-80 h-12"
+        placeholder="Enter your Phone Number"
+        keyboardType="phone-pad"
+        value={form.phoneNumber}
+        onChangeText={(e) => setForm({ ...form, phoneNumber: e })}
       />
 
       {/* Password Input */}
