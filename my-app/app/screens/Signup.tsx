@@ -29,7 +29,7 @@ const Signup = () => {
     } else if (form.password !== form.confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
     } else {
-      const response=await fetch("http://localhost:5000/api/v1/auth/signup", {
+      const response=await fetch("http://localhost:5000/app/api/v1/auth/signup", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,7 +37,6 @@ const Signup = () => {
         body: JSON.stringify({...form})
       })
       console.log(response)
-      console.log({...form});
       const data=await response.json();
       console.log("Data being sent to B.E:",{...form})
     }
