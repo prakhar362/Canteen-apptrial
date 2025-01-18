@@ -5,6 +5,7 @@ type CartItem = {
   id: number;
   title: string;
   price: number;
+  img:String
   quantity: number;
 };
 

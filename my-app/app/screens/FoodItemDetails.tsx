@@ -66,6 +66,7 @@ const FoodItemDetails: React.FC = () => {
     const newCartItem = {
       id: foodDetails._id,
       title: foodDetails.name,
+      img: foodDetails.img,
       price: foodDetails.price,
       quantity,
     };
@@ -114,7 +115,7 @@ const FoodItemDetails: React.FC = () => {
 
       <View style={styles.footer}>
         <View style={styles.priceQuantityContainer}>
-          <Text style={styles.price}>${foodDetails.price.toFixed(2)}</Text>
+          <Text style={styles.price}>₹ {foodDetails.price.toFixed(2)}</Text>
           <View style={styles.quantityContainer}>
             <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
               <Text style={styles.quantityButtonText}>-</Text>

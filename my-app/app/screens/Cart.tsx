@@ -29,8 +29,8 @@ const CartScreen: React.FC = () => {
 
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle}>{item.title}</Text>
-        <Text style={styles.itemSize}>14"</Text>
-        <Text style={styles.itemPrice}>${item.price}</Text>
+        
+        <Text style={styles.itemPrice}>₹{item.price}</Text>
       </View>
       <View style={styles.rightContainer}>
         <TouchableOpacity
@@ -76,7 +76,7 @@ const CartScreen: React.FC = () => {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>TOTAL:</Text>
-          <Text style={styles.totalAmount}>${calculateTotal().toFixed(2)}</Text>
+          <Text style={styles.totalAmount}>₹{calculateTotal().toFixed(2)}</Text>
         </View>
         <TouchableOpacity style={styles.placeOrderButton}>
           <Text style={styles.placeOrderButtonText}>PLACE ORDER</Text>
