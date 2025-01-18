@@ -62,6 +62,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
   }, []);
 
   const handleSave = async () => {
+    // Clean the phone number before sending
+    const formattedPhone = phone.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+
+    // Log the data to be sent
+    console.log("Saving data:", { username, phone, email });
+
     try {
       const token = await AsyncStorage.getItem("userToken");
       if (!token) {
