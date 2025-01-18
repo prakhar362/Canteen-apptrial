@@ -22,7 +22,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
   const [username, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [bio, setBio] = useState("");
+  
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -49,9 +49,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
 
         const data = await response.json();
         setName(data.username);
-        setPhone(data.phone);
+        setPhone(data.phoneNumber);
         setEmail(data.email);
-        setBio(data.bio);
+        
       } catch (error) {
         console.error(error);
         Alert.alert("Error", "Failed to load profile data.");
@@ -75,7 +75,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ username, phone, email, bio }),
+        body: JSON.stringify({ username, phone, email }),
       });
 
       if (!response.ok) {
@@ -113,16 +113,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
         </View>
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>{username}</Text>
-          {isEditing ? (
-            <TextInput
-              style={styles.bioInput}
-              value={bio}
-              onChangeText={setBio}
-              placeholder="Enter your bio"
-            />
-          ) : (
-            <Text style={styles.bioText}>{bio}</Text>
-          )}
         </View>
       </View>
       <View style={styles.profileDetails}>
