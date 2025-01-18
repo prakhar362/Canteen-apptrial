@@ -1,6 +1,8 @@
 import React from "react";
+
 import {
   View,
+  Image,
   Text,
   FlatList,
   StyleSheet,
@@ -19,11 +21,12 @@ const CartScreen: React.FC = () => {
       0
     );
 
-  const renderCartItem = ({ item }: any) => (
+  const renderCartItem = ({ item }:any) => (
     <View style={styles.cartItem}>
       <View style={styles.itemImageContainer}>
-        <View style={styles.itemImage} />
-      </View>
+  <Image source={{ uri: item.img }} style={styles.itemImage} />
+</View>
+
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle}>{item.title}</Text>
         <Text style={styles.itemSize}>14"</Text>
@@ -122,7 +125,6 @@ const styles = StyleSheet.create({
   itemImage: {
     width: 80,
     height: 80,
-    backgroundColor: "#F5F5F5",
     borderRadius: 8,
   },
   itemDetails: {
@@ -215,6 +217,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-});
+  
+
+  });
+  
 
 export default CartScreen;

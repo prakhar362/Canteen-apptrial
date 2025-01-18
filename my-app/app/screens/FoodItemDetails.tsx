@@ -1,33 +1,93 @@
-import React, { useState } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useCart } from "../context/CartContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 type FoodItemDetailsRouteProp = RouteProp<RootStackParamList, "FoodItemDetails">;
 
 const FoodItemDetails: React.FC = () => {
   const route = useRoute<FoodItemDetailsRouteProp>();
   const navigation = useNavigation();
   const { foodItem } = route.params;
+  const { addToCart } = useCart();
 
-  const { addToCart } = useCart(); // Access the addToCart function from the context
+  const [foodDetails, setFoodDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
+
+  useEffect(() => {
+    const fetchFoodDetails = async () => {
+      setLoading(true);
+      setError(null);
+  
+      try {
+        const token = await AsyncStorage.getItem("userToken"); // Retrieve token from AsyncStorage
+  
+        if (!token) {
+          throw new Error("User token not found. Please log in again.");
+        }
+  
+        const response = await fetch(
+          `http://localhost:5000/app/api/v1/fooditem/${foodItem._id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        if (!response.ok) {
+          throw new Error("Failed to load food details. Please try again.");
+        }
+  
+        const data = await response.json();
+        console.log(data);
+        setFoodDetails(data);
+      } catch (err:any) {
+        setError(err.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchFoodDetails();
+  }, [foodItem._id]);
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = () => {
     const newCartItem = {
-      id: foodItem.id,
-      title: foodItem.title,
-      price: foodItem.price,
-      quantity, // Updated quantity
+      id: foodDetails._id,
+      title: foodDetails.name,
+      price: foodDetails.price,
+      quantity,
     };
-    //navigation.navigate("Cart", { cartItems: [newCartItem] });
-    addToCart(newCartItem); // Add item to the cart
-    navigation.navigate("Cart"); // Navigate to the Cart page
+    addToCart(newCartItem);
+    navigation.navigate("Cart");
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#FF7622" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -39,23 +99,22 @@ const FoodItemDetails: React.FC = () => {
       </View>
 
       <View style={styles.imageContainer}>
-        <Image source={{ uri: foodItem.imageUrl }} style={styles.image} />
+        <Image source={{ uri: foodDetails.img }} style={styles.image} />
         <TouchableOpacity style={styles.favoriteButton}>
           <Ionicons name="heart-outline" size={24} color="#FFF" />
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.title}>{foodItem.title}</Text>
-      <Text style={styles.description}>{foodItem.description}</Text>
+      <Text style={styles.title}>{foodDetails.name}</Text>
+      <Text style={styles.description}>{foodDetails.description}</Text>
 
       <View style={styles.detailsRow}>
-        <Text style={styles.rating}>⭐ {foodItem.rating}</Text>
-        <Text style={styles.time}>⏱️ {foodItem.time}</Text>
+        <Text style={styles.rating}>⭐ {foodDetails.rating}</Text>
       </View>
 
       <View style={styles.footer}>
         <View style={styles.priceQuantityContainer}>
-          <Text style={styles.price}>${foodItem.price.toFixed(2)}</Text>
+          <Text style={styles.price}>${foodDetails.price.toFixed(2)}</Text>
           <View style={styles.quantityContainer}>
             <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
               <Text style={styles.quantityButtonText}>-</Text>
@@ -80,6 +139,20 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#FFF",
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "#FF0000",
+    fontSize: 16,
   },
   header: {
     flexDirection: "row",
@@ -128,10 +201,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   rating: {
-    fontSize: 16,
-    color: "#888",
-  },
-  time: {
     fontSize: 16,
     color: "#888",
   },
