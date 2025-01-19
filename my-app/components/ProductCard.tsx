@@ -23,8 +23,8 @@ const FoodItemCard: React.FC<FoodItemCardProps> = ({
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.rating}>⭐ Rating: {rating}</Text>
-        <Text style={styles.time}>⏱️ Time: {time}</Text>
+        <Text style={styles.rating}>⭐ Rating: 4</Text>
+        <Text style={styles.time}>⏱️ Time: 15 min</Text>
       </View>
     </TouchableOpacity>
   );

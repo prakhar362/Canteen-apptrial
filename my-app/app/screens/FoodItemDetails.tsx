@@ -94,7 +94,7 @@ const FoodItemDetails: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>{"<"}</Text>
+          <Image source={require("../assets/images/Back.png")} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Details</Text>
       </View>
@@ -110,7 +110,7 @@ const FoodItemDetails: React.FC = () => {
       <Text style={styles.description}>{foodDetails.description}</Text>
 
       <View style={styles.detailsRow}>
-        <Text style={styles.rating}>⭐ {foodDetails.rating}</Text>
+        <Text style={styles.rating}>Rating: ⭐ ⭐ ⭐ ⭐</Text>
       </View>
 
       <View style={styles.footer}>

@@ -29,7 +29,7 @@ const CartScreen: React.FC = () => {
 
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle}>{item.title}</Text>
-        
+        ⭐ ⭐ ⭐ ⭐
         <Text style={styles.itemPrice}>₹{item.price}</Text>
       </View>
       <View style={styles.rightContainer}>
@@ -62,7 +62,7 @@ const CartScreen: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>{"<"}</Text>
+        <Image source={require("../assets/images/Back.png")} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cart</Text>
       </View>
@@ -72,6 +72,7 @@ const CartScreen: React.FC = () => {
   keyExtractor={(item) => item.id.toString()} // Convert ID to string
   style={styles.cartList}
 />
+
 
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
