@@ -79,7 +79,7 @@ const CartScreen: React.FC = () => {
           <Text style={styles.totalLabel}>TOTAL:</Text>
           <Text style={styles.totalAmount}>₹{calculateTotal().toFixed(2)}</Text>
         </View>
-        <TouchableOpacity style={styles.placeOrderButton}>
+        <TouchableOpacity style={styles.placeOrderButton} onPress={() => navigation.navigate('MakePayment')}>
           <Text style={styles.placeOrderButtonText}>PLACE ORDER</Text>
         </TouchableOpacity>
       </View>

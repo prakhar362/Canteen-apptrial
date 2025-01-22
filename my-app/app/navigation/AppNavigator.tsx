@@ -12,6 +12,7 @@ import Orders from '../screens/Orders';
 import Cart from "../screens/Cart";
 import { VerificationScreen,ForgotPasswordScreen } from "../screens/ForgetPass";
 import ContactUs from "../../components/ContactUs";
+import MakePayment from "../screens/makePayment";
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   FoodItemDetails: { foodItem: FoodItem }; // foodItem must be passed
   TrackOrder:undefined;
   PaymentSuccessful:undefined;
+  MakePayment:undefined;
   Profile:undefined;
   Orders:undefined;
   Cart: { cartItems: { id: string; title: string; price: number; quantity: number }[] };
@@ -61,6 +63,7 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="FoodItemDetails" component={FoodItemDetails} />
+          <Stack.Screen name="MakePayment" component={MakePayment} />
           <Stack.Screen name="PaymentSuccessful" component={PaymentSuccessful} />
           <Stack.Screen name="TrackOrder" component={TrackOrder} />
           <Stack.Screen name="Profile" component={Profile} />
