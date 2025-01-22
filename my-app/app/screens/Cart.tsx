@@ -69,7 +69,7 @@ const handlePayment = () => {
     image: "https://example.com/logo.png", // Replace with your logo
     currency: "INR",
     order_id:"123",
-    key: "rzp_test_I4JpbMLLjIb9tW", // Replace with your Razorpay key
+    key: "", // Replace with your Razorpay key
     amount: totalAmount * 100, // Amount in paise
     name: "Food",
     prefill: {
