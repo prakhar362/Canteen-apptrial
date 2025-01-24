@@ -12,7 +12,7 @@ import Orders from '../screens/Orders';
 import Cart from "../screens/Cart";
 import { VerificationScreen,ForgotPasswordScreen } from "../screens/ForgetPass";
 import ContactUs from "../../components/ContactUs";
-import MakePayment from "../screens/makePayment";
+import MakePayment from "../screens/PaymentPage";
 
 export type RootStackParamList = {
   Splash: undefined;

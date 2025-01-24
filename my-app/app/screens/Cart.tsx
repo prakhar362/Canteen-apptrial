@@ -60,37 +60,11 @@ const CartScreen: React.FC = () => {
     </View>
   );
 
-  // Inside the component
-const handlePayment = () => {
-  const totalAmount = calculateTotal();
-
-  const options = {
-    description: "Order Payment",
-    image: "https://example.com/logo.png", // Replace with your logo
-    currency: "INR",
-    order_id:"123",
-    key: "", // Replace with your Razorpay key
-    amount: totalAmount * 100, // Amount in paise
-    name: "Food",
-    prefill: {
-      email: "ps15@gmail.com", // Prefill email
-      contact: "7400102195", // Prefill phone number
-      name: "Prakhar Shrivastava",
-    },
-    theme: { color: "#FF7622" },
+  const handleNavigateToPayment = () => {
+    const totalAmount = calculateTotal();
+    navigation.navigate("MakePayment", { totalAmount });
   };
-
-  RazorpayCheckout.open(options)
-    .then((data) => {
-      // Handle successful payment
-      alert(`Payment Success! Payment ID: ${data.razorpay_payment_id}`);
-      
-    })
-    .catch((error) => {
-      // Handle payment failure
-      alert(`Payment Failed! Error: ${error.description}`);
-    });
-};
+  
 
   return (
     <View style={styles.container}>
@@ -113,7 +87,7 @@ const handlePayment = () => {
           <Text style={styles.totalLabel}>TOTAL:</Text>
           <Text style={styles.totalAmount}>₹{calculateTotal().toFixed(2)}</Text>
         </View>
-        <TouchableOpacity style={styles.placeOrderButton} onPress={handlePayment}>
+        <TouchableOpacity style={styles.placeOrderButton} onPress={handleNavigateToPayment}>
           <Text style={styles.placeOrderButtonText}>PLACE ORDER</Text>
         </TouchableOpacity>
       </View>
