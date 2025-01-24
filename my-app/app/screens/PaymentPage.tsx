@@ -11,11 +11,13 @@ const PaymentPage: React.FC = ({ route }: any) => {
   useEffect(() => {
     const createOrder = async () => {
       if (!totalAmount || totalAmount <= 0) {
+        console.log("Invalid amount:", totalAmount);
         Alert.alert("Error", "Invalid total amount.");
         return;
       }
       setLoading(true);
       try {
+        console.log("Sending request to create order...");
         const response = await fetch("http://localhost:5000/app/api/v1/createOrder", {
           method: "POST",
           headers: {
@@ -25,6 +27,8 @@ const PaymentPage: React.FC = ({ route }: any) => {
         });
 
         const result = await response.json();
+        console.log("Order creation response:", result);
+
         if (response.ok && result.id) {
           setOrderId(result.id); // Set the order ID from the response
         } else {
@@ -66,10 +70,12 @@ const PaymentPage: React.FC = ({ route }: any) => {
 
     RazorpayCheckout.open(options)
       .then((data) => {
+        console.log("Payment data:", data);
         Alert.alert("Success", `Payment Successful! Payment ID: ${data.razorpay_payment_id}`);
         confirmPayment(data.razorpay_payment_id);
       })
       .catch((error) => {
+        console.error("Payment Error:", error);
         Alert.alert("Error", `Payment Failed! Error: ${error.description}`);
       });
   };
@@ -77,6 +83,7 @@ const PaymentPage: React.FC = ({ route }: any) => {
   // Confirm the payment on the backend (optional but recommended)
   const confirmPayment = async (paymentId: string) => {
     try {
+      console.log("Sending request to confirm payment...");
       const response = await fetch("http://localhost:5000/app/api/v1/payment", {
         method: "POST",
         headers: {
@@ -86,8 +93,11 @@ const PaymentPage: React.FC = ({ route }: any) => {
       });
 
       const result = await response.json();
-      console.log(result); // Handle payment confirmation response
-      if (!response.ok) {
+      console.log("Payment confirmation response:", result);
+
+      if (response.ok) {
+        console.log("Payment confirmed:", result);
+      } else {
         Alert.alert("Payment Confirmation Failed", "Please contact support.");
       }
     } catch (error) {
