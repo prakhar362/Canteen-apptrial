@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import RazorpayCheckout from "react-native-razorpay";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from "react-native";
+import { WebView } from "react-native-webview"; // Import WebView
 
 const PaymentPage: React.FC = ({ route }: any) => {
   const { totalAmount } = route.params; // Get the total amount from the previous page
   const [orderId, setOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null); // For storing the Razorpay URL
 
   // Create an order when the component mounts
   useEffect(() => {
@@ -31,6 +32,10 @@ const PaymentPage: React.FC = ({ route }: any) => {
 
         if (response.ok && result.id) {
           setOrderId(result.id); // Set the order ID from the response
+          console.log("Result ID: ",result.id)
+          // Construct the Razorpay payment URL
+          const paymentUrl = 'https://checkout.razorpay.com/v1/checkout.js?order_id=${result.id}&key=rzp_test_kNTNMzLSu9RLNK';
+          setPaymentUrl(paymentUrl); // Set payment URL for WebView
         } else {
           Alert.alert("Error", "Failed to create order. Please try again.");
         }
@@ -45,80 +50,53 @@ const PaymentPage: React.FC = ({ route }: any) => {
     createOrder();
   }, [totalAmount]);
 
-  // Handle payment process
+  // Handle payment process via WebView
   const handlePayment = () => {
     if (!orderId) {
       Alert.alert("Error", "Order creation failed.");
       return;
     }
-
-    const options = {
-      description: "Order Payment",
-      image: "https://example.com/logo.png", // Add your logo URL
-      currency: "INR",
-      order_id: orderId,
-      key: "rzp_test_I4JpbMLLjIb9tW", // Replace with your Razorpay key
-      amount: totalAmount * 100, // Amount in paise
-      name: "Food App",
-      prefill: {
-        email: "user@example.com",
-        contact: "1234567890",
-        name: "John Doe",
-      },
-      theme: { color: "#FF7622" },
-    };
-
-    RazorpayCheckout.open(options)
-      .then((data) => {
-        console.log("Payment data:", data);
-        Alert.alert("Success", `Payment Successful! Payment ID: ${data.razorpay_payment_id}`);
-        confirmPayment(data.razorpay_payment_id);
-      })
-      .catch((error) => {
-        console.error("Payment Error:", error);
-        Alert.alert("Error", `Payment Failed! Error: ${error.description}`);
-      });
-  };
-
-  // Confirm the payment on the backend (optional but recommended)
-  const confirmPayment = async (paymentId: string) => {
-    try {
-      console.log("Sending request to confirm payment...");
-      const response = await fetch("http://localhost:5000/app/api/v1/payment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ paymentId }),
-      });
-
-      const result = await response.json();
-      console.log("Payment confirmation response:", result);
-
-      if (response.ok) {
-        console.log("Payment confirmed:", result);
-      } else {
-        Alert.alert("Payment Confirmation Failed", "Please contact support.");
-      }
-    } catch (error) {
-      console.error("Error confirming payment", error);
-      Alert.alert("Error", "Payment confirmation failed.");
+    // If the orderId is available, the payment URL will be loaded in WebView
+    if (paymentUrl) {
+      
+      console.log("Redirecting to Razorpay payment page...");
+    } else {
+      Alert.alert("Error", "Payment URL is not ready yet.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Payment Page</Text>
-      <Text style={styles.amount}>Total Amount: ₹{totalAmount}</Text>
-      <TouchableOpacity
-        style={styles.paymentButton}
-        onPress={handlePayment}
-        disabled={loading}
-      >
-        <Text style={styles.paymentButtonText}>
-          {loading ? "Processing..." : "Pay Now"}
-        </Text>
-      </TouchableOpacity>
+      {Platform.OS !== "web" && paymentUrl ? ( // Check platform before rendering WebView
+        <WebView
+          source={{ uri: paymentUrl }}
+          style={styles.webview}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          onNavigationStateChange={(event) => {
+            if (event.url.includes("success")) {
+              Alert.alert("Success", "Payment Successful!");
+              // Call your backend to verify payment, etc.
+            } else if (event.url.includes("failure")) {
+              Alert.alert("Error", "Payment Failed!");
+            }
+          }}
+        />
+      ) : (
+        <>
+          <Text style={styles.title}>Payment Page</Text>
+          <Text style={styles.amount}>Total Amount: ₹{totalAmount}</Text>
+          <TouchableOpacity
+            style={styles.paymentButton}
+            onPress={handlePayment}
+            disabled={loading}
+          >
+            <Text style={styles.paymentButtonText}>
+              {loading ? "Processing..." : "Pay Now"}
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
@@ -149,6 +127,10 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
+  },
+  webview: {
+    width: "100%",
+    height: "100%",
   },
 });
 
