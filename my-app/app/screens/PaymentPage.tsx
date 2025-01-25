@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from "react-native";
-import { WebView } from "react-native-webview"; // Import WebView
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 
 const PaymentPage: React.FC = ({ route }: any) => {
-  const { totalAmount } = route.params; // Get the total amount from the previous page
+  const { totalAmount } = route.params;
   const [orderId, setOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null); // For storing the Razorpay URL
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
-  // Create an order when the component mounts
   useEffect(() => {
     const createOrder = async () => {
       if (!totalAmount || totalAmount <= 0) {
@@ -32,10 +31,9 @@ const PaymentPage: React.FC = ({ route }: any) => {
 
         if (response.ok && result.id) {
           setOrderId(result.id); // Set the order ID from the response
-          console.log("Result ID: ",result.id)
-          // Construct the Razorpay payment URL
-          const paymentUrl = 'https://checkout.razorpay.com/v1/checkout.js?order_id=${result.id}&key=rzp_test_kNTNMzLSu9RLNK';
-          setPaymentUrl(paymentUrl); // Set payment URL for WebView
+          console.log("Result ID: ", result.id);
+          const paymentUrl = `https://checkout.razorpay.com/v1/checkout.js?order_id=${result.id}&key=rzp_test_kNTNMzLSu9RLNK=${totalAmount * 100}`;
+          setPaymentUrl(paymentUrl);
         } else {
           Alert.alert("Error", "Failed to create order. Please try again.");
         }
@@ -50,16 +48,19 @@ const PaymentPage: React.FC = ({ route }: any) => {
     createOrder();
   }, [totalAmount]);
 
-  // Handle payment process via WebView
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (!orderId) {
       Alert.alert("Error", "Order creation failed.");
       return;
     }
-    // If the orderId is available, the payment URL will be loaded in WebView
+
     if (paymentUrl) {
-      
-      console.log("Redirecting to Razorpay payment page...");
+      try {
+        console.log("Redirecting to Razorpay payment page...");
+        await WebBrowser.openBrowserAsync(paymentUrl);
+      } catch (error) {
+        console.error("Error opening WebBrowser", error);
+      }
     } else {
       Alert.alert("Error", "Payment URL is not ready yet.");
     }
@@ -67,36 +68,17 @@ const PaymentPage: React.FC = ({ route }: any) => {
 
   return (
     <View style={styles.container}>
-      {Platform.OS !== "web" && paymentUrl ? ( // Check platform before rendering WebView
-        <WebView
-          source={{ uri: paymentUrl }}
-          style={styles.webview}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          onNavigationStateChange={(event) => {
-            if (event.url.includes("success")) {
-              Alert.alert("Success", "Payment Successful!");
-              // Call your backend to verify payment, etc.
-            } else if (event.url.includes("failure")) {
-              Alert.alert("Error", "Payment Failed!");
-            }
-          }}
-        />
-      ) : (
-        <>
-          <Text style={styles.title}>Payment Page</Text>
-          <Text style={styles.amount}>Total Amount: ₹{totalAmount}</Text>
-          <TouchableOpacity
-            style={styles.paymentButton}
-            onPress={handlePayment}
-            disabled={loading}
-          >
-            <Text style={styles.paymentButtonText}>
-              {loading ? "Processing..." : "Pay Now"}
-            </Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <Text style={styles.title}>Payment Page</Text>
+      <Text style={styles.amount}>Total Amount: ₹{totalAmount}</Text>
+      <TouchableOpacity
+        style={styles.paymentButton}
+        onPress={handlePayment}
+        disabled={loading}
+      >
+        <Text style={styles.paymentButtonText}>
+          {loading ? "Processing..." : "Pay Now"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -127,10 +109,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
-  },
-  webview: {
-    width: "100%",
-    height: "100%",
   },
 });
 
