@@ -54,17 +54,18 @@ const PaymentPage: React.FC = ({ route }: any) => {
       return;
     }
 
-    if (paymentUrl) {
-      try {
+    try {
+      if (paymentUrl) {
         console.log("Redirecting to Razorpay payment page...");
         await WebBrowser.openBrowserAsync(paymentUrl);
-      } catch (error) {
-        console.error("Error opening WebBrowser", error);
+      } else {
+        Alert.alert("Error", "Payment URL is not ready yet.");
       }
-    } else {
-      Alert.alert("Error", "Payment URL is not ready yet.");
+    } catch (error) {
+      console.error("Error opening WebBrowser:", error);
+      Alert.alert("Error", "An error occurred while opening the payment page.");
     }
-  };
+  }    
 
   return (
     <View style={styles.container}>
