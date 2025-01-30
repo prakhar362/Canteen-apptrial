@@ -18,7 +18,7 @@ const PaymentPage: React.FC = ({ route }: any) => {
       setLoading(true);
       try {
         console.log("Sending request to create order...");
-        const response = await fetch("http://localhost:5000/app/api/v1/createOrder", {
+        const response = await fetch("https://canteen-web-demo.onrender.com/app/api/v1/createOrder", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
