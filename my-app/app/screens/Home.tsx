@@ -24,7 +24,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     const fetchFoodItems = async () => {
       try {
-        const response = await fetch('http://localhost:5000/app/api/v1/fooditem', { // Replace with actual IP address if needed
+        const response = await fetch('https://canteen-web-demo.onrender.com/app/api/v1/fooditem', { // Replace with actual IP address if needed
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
