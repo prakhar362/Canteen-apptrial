@@ -39,7 +39,7 @@ const SignIn: React.FC = () => {
     if (!form.email || !form.password) {
       Alert.alert("Error", "Please fill in all fields");
     } else {
-      const response = await fetch("http://localhost:5000/app/api/v1/auth/login", {
+      const response = await fetch("https://canteen-web-demo.onrender.com/api/v1/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
