@@ -32,7 +32,7 @@ const PaymentPage: React.FC = ({ route }: any) => {
         if (response.ok && result.id) {
           setOrderId(result.id); // Set the order ID from the response
           console.log("Result ID: ", result.id);
-          const paymentUrl = `https://checkout.razorpay.com/v1/checkout.js?order_id=${result.id}&key=rzp_test_kNTNMzLSu9RLNK=${totalAmount * 100}`;
+          const paymentUrl = `https://checkout.razorpay.com/v1/checkout.js?order_id=${result.id}&key=rzp_test_qJLabrBReNvJWY=${totalAmount * 100}`;
           setPaymentUrl(paymentUrl);
         } else {
           Alert.alert("Error", "Failed to create order. Please try again.");
