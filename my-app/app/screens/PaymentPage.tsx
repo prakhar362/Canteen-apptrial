@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
-const PaymentPage: React.FC = ({ route }: any) => {
+import RazorpayCheckout from 'react-native-razorpay';
+
+const PaymentPage: React.FC = ({ route,navigation }: any) => {
   const { totalAmount } = route.params;
   const [orderId, setOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+
 
   useEffect(() => {
     const createOrder = async () => {
       if (!totalAmount || totalAmount <= 0) {
-        console.log("Invalid amount:", totalAmount);
         Alert.alert("Error", "Invalid total amount.");
         return;
       }
       setLoading(true);
       try {
-        console.log("Sending request to create order...");
         const response = await fetch("https://canteen-web-demo.onrender.com/app/api/v1/createOrder", {
           method: "POST",
           headers: {
@@ -27,13 +26,9 @@ const PaymentPage: React.FC = ({ route }: any) => {
         });
 
         const result = await response.json();
-        console.log("Order creation response:", result);
 
         if (response.ok && result.id) {
-          setOrderId(result.id); // Set the order ID from the response
-          console.log("Result ID: ", result.id);
-          const paymentUrl = `https://checkout.razorpay.com/v1/checkout.js?order_id=${result.id}&key=rzp_test_qJLabrBReNvJWY=${totalAmount * 100}`;
-          setPaymentUrl(paymentUrl);
+          setOrderId(result.id); // Store order ID
         } else {
           Alert.alert("Error", "Failed to create order. Please try again.");
         }
@@ -55,17 +50,31 @@ const PaymentPage: React.FC = ({ route }: any) => {
     }
 
     try {
-      if (paymentUrl) {
-        console.log("Redirecting to Razorpay payment page...");
-        await WebBrowser.openBrowserAsync(paymentUrl);
-      } else {
-        Alert.alert("Error", "Payment URL is not ready yet.");
-      }
+      const data = await RazorpayCheckout.open({
+        description: "Canteen Order Payment",
+        image: "https://your-logo-url.com/logo.png",
+        currency: "INR",
+        key: "rzp_test_qJLabrBReNvJWY",
+        amount: totalAmount * 100, // Convert to paise
+        name: "Canteen Order",
+        order_id: orderId, // This is mandatory
+        prefill: {
+          email: "user@example.com",
+          contact: "9999999999",
+          name: "John Doe",
+        },
+        theme: { color: "#FF7622" },
+      });
+
+      console.log("Payment Success:", data);
+      Alert.alert("Success", "Payment successful!");
+      // Handle success logic (e.g., update order status, navigate)
+      navigation.navigate("PaymentSuccessful");
     } catch (error) {
-      console.error("Error opening WebBrowser:", error);
-      Alert.alert("Error", "An error occurred while opening the payment page.");
+      console.error("Payment Failed:", error);
+      Alert.alert("Error", "Payment failed. Please try again.");
     }
-  }    
+  };
 
   return (
     <View style={styles.container}>
