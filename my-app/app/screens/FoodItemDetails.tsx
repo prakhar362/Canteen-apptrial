@@ -32,7 +32,7 @@ const FoodItemDetails: React.FC = () => {
         }
   
         const response = await fetch(
-          `https://canteen-web-demo.onrender.com/api/v1/fooditem/${foodItem._id}`,
+          `https://canteen-web-demo.onrender.com/app/api/v1/fooditem/${foodItem._id}`,
           {
             method: "GET",
             headers: {
