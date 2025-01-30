@@ -35,7 +35,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
           return;
         }
         
-        const response = await fetch("http://localhost:5000/app/api/v1/profile", {
+        const response = await fetch("https://canteen-web-demo.onrender.com/app/api/v1/profile", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
