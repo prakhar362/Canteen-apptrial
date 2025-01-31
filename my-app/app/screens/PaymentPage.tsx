@@ -127,19 +127,19 @@ const PaymentPage: React.FC = ({ route, navigation }: any) => {
       const orderData = {
         userId: userData._id,
         foodItems: cartItems.map((item) => ({
-          id: item.id,
-          title: item.title,
+          foodItemId: item.id,
+          name: item.title,
           price: item.price,
           quantity: item.quantity,
         })),
-        totalAmount: totalAmount,
-        
+        totalAmount,
+        paymentId: data.razorpay_payment_id,
         
       };
 
       try {
         const response = await fetch(
-          "https://canteen-web.onrender.com/api/orders/create",
+          "https://canteen-web-1.onrender.com/api/orders/create",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
