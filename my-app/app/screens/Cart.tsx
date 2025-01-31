@@ -31,7 +31,7 @@ const CartScreen: React.FC = () => {
 
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle}>{item.title}</Text>
-        ⭐ ⭐ ⭐ ⭐
+        <Text>⭐ ⭐ ⭐ ⭐</Text>
         <Text style={styles.itemPrice}>₹{item.price}</Text>
       </View>
       <View style={styles.rightContainer}>
