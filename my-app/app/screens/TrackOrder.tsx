@@ -39,7 +39,7 @@ const TrackOrder = () => {
     <SafeAreaView style={styles.safeArea}>
       {/* Fixed Header */}
       <View style={styles.header}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Home")}>
           <Image 
             source={require("../assets/images/Back.png")} 
             style={styles.backImage} 
@@ -78,7 +78,7 @@ const TrackOrder = () => {
             {/* Vertical Line */}
             <View style={styles.progressLineContainer}>
               <View style={styles.progressLine} />
-              <View style={[styles.progressLineFilled, { height: `${(progress - 1) * 39}%` }]} />
+              <View style={[styles.progressLineFilled, { height:`${(progress - 1) * 39}%`  }]} />
             </View>
 
             {/* Status Points */}
