@@ -1,13 +1,88 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from '../navigation/AppNavigator'; // Adjust the import path based on your file structure
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { RootStackParamList } from '../navigation/AppNavigator'; 
 
 type PaymentScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PaymentSuccessful'>;
 
 const PaymentSuccessful: React.FC = () => {
   const navigation = useNavigation<PaymentScreenNavigationProp>();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [tokenNo, setTokenNo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+
+        if (!token) {
+          Alert.alert("Error", "User not authenticated.");
+          return;
+        }
+
+        const response = await fetch(
+          "https://canteen-web-1.onrender.com/app/api/v1/profile",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setUserData(data);
+          setUserId(data._id);
+        } else {
+          Alert.alert("Error", "Failed to fetch user details.");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        Alert.alert("Error", "Something went wrong while fetching user data.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      if (!userId) return;
+      try {
+        const tokenResponse = await fetch(
+          "https://canteen-web-1.onrender.com/app/api/v1/generatetoken",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId }),
+          }
+        );
+
+        const tokenData = await tokenResponse.json();
+
+        if (!tokenData.success) {
+          Alert.alert("Error", "Failed to retrieve token number.");
+          return;
+        }
+
+        setTokenNo(tokenData.orderId);
+      } catch (error) {
+        console.error("Error fetching token number:", error);
+        Alert.alert("Error", "Something went wrong while fetching token number.");
+      }
+    };
+
+    fetchToken();
+  }, [userId]);
 
   const handleTrackOrder = () => {
     navigation.navigate('TrackOrder');
@@ -15,7 +90,7 @@ const PaymentSuccessful: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.token}>TOKEN NO: 115</Text>
+      <Text style={styles.token}>TOKEN NO: {tokenNo || "Loading..."}</Text>
       <Image
         source={require("../assets/images/thankyou.jpeg")}
         style={styles.image}
