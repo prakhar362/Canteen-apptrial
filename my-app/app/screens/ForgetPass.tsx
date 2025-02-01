@@ -51,7 +51,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navi
       setIsValidEmail(true);
       try {
         // Replace with actual API request
-        const response = await fetch('http://localhost:5000/app/api/forgotpassword/forgotpass', {
+        const response = await fetch('https://canteen-web-1.onrender.com/app/api/forgotpassword/forgotpass', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
