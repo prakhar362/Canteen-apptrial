@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const handleLogout = async () => {
     try {
-        const response = await fetch("https://canteen-web-demo.onrender.com/app/api/v1/auth/logout", {
+        const response = await fetch("https://canteen-web-1.onrender.com/app/api/v1/auth/logout", {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -31,7 +31,7 @@ const PaymentPage: React.FC = ({ route, navigation }: any) => {
         }
 
         const response = await fetch(
-          "https://canteen-web-demo.onrender.com/app/api/v1/profile",
+          "https://canteen-web-1.onrender.com/app/api/v1/profile",
           {
             method: "GET",
             headers: {
@@ -65,7 +65,7 @@ const PaymentPage: React.FC = ({ route, navigation }: any) => {
       setLoading(true);
       try {
         const response = await fetch(
-          "https://canteen-web-demo.onrender.com/app/api/v1/createOrder",
+          "https://canteen-web-1.onrender.com/app/api/v1/createOrder",
           {
             method: "POST",
             headers: {

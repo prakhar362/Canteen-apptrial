@@ -35,7 +35,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
           return;
         }
         
-        const response = await fetch("https://canteen-web-demo.onrender.com/app/api/v1/profile", {
+        const response = await fetch("https://canteen-web-1.onrender.com/app/api/v1/profile", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -75,7 +75,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
         return;
       }
 
-      const response = await fetch("https://canteen-web-demo.onrender.com/app/api/v1/profile", {
+      const response = await fetch("https://canteen-web-1.onrender.com/app/api/v1/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
