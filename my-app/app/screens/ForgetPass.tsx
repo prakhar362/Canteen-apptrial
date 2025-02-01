@@ -185,7 +185,7 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ navigati
     const otp = code.join('');
     try {
       // Replace mock verification with actual API call
-      const response = await fetch('http://localhost:5000/app/api/forgotpassword/verifyOtp', {
+      const response = await fetch('https://canteen-web-1.onrender.com/app/api/forgotpassword/verifyOtp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
