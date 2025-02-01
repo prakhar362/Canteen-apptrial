@@ -13,6 +13,7 @@ import Cart from "../screens/Cart";
 import { VerificationScreen,ForgotPasswordScreen } from "../screens/ForgetPass";
 import ContactUs from "../../components/ContactUs";
 import MakePayment from "../screens/PaymentPage";
+import PasswordCreationScreen from '../screens/Newpass'
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -29,6 +30,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   Verification:{ email: string };
   ContactUs: undefined;
+  PasswordCreationScreen:{ email: string,otp:string };
 };
 
 
@@ -71,7 +73,9 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen name="Cart" component={Cart} />
           <Stack.Screen name="ContactUs" component={ContactUs} />
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-        <Stack.Screen name="Verification" component={VerificationScreen} />
+          <Stack.Screen name="Verification" component={VerificationScreen} />
+          <Stack.Screen name="PasswordCreationScreen" component={PasswordCreationScreen} />
+
         </>
       )}
     </Stack.Navigator>

@@ -9,6 +9,7 @@ import {
   Platform,
   SafeAreaView,
   Image,
+  Alert
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -24,10 +25,7 @@ type VerificationScreenNavigationProp = StackNavigationProp<
   'Verification'
 >;
 
-type VerificationScreenRouteProp = RouteProp<
-  RootStackParamList,
-  'Verification'
->;
+type VerificationScreenRouteProp = RouteProp<RootStackParamList,'Verification'>;
 
 interface ForgotPasswordScreenProps {
   navigation: ForgotPasswordScreenNavigationProp;
@@ -48,11 +46,29 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navi
     return emailRegex.test(email);
   };
 
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     if (validateEmail(email)) {
       setIsValidEmail(true);
-      // Add your API call logic here
-      navigation.navigate('Verification', { email });
+      try {
+        // Replace with actual API request
+        const response = await fetch('http://localhost:5000/app/api/forgotpassword/forgotpass', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+        
+        if (response.ok) {
+          // Navigate to verification screen with the email
+          navigation.navigate('Verification', { email });
+        } else {
+          const data = await response.json();
+          Alert.alert('Error', data.message || 'Something went wrong');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to send the code. Please try again later.');
+      }
     } else {
       setIsValidEmail(false);
     }
@@ -68,17 +84,12 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navi
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Image
-            source={require("../assets/images/Back.png")}
-
-          />
+          <Image source={require("../assets/images/Back.png")} />
         </TouchableOpacity>
 
         <View style={styles.content}>
           <Text style={styles.title}>Forgot Password</Text>
-          <Text style={styles.subtitle}>
-            Please sign in to your existing account
-          </Text>
+          <Text style={styles.subtitle}>Please sign in to your existing account</Text>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>EMAIL</Text>
@@ -146,41 +157,64 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ navigati
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (resendTimer === 0) {
-      // Add your resend code logic here
-      setResendTimer(50);
+      try {
+        // Resend code logic (replace with actual API request)
+        const response = await fetch('https://canteen-web-1.onrender.com/app/api/forgotpassword/forgotpass', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        if (response.ok) {
+          setResendTimer(50);
+        } else {
+          const data = await response.json();
+          Alert.alert('Error', data.message || 'Failed to resend code');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to resend code. Please try again later.');
+      }
     }
   };
 
-  const handleVerify = () => {
-    const fullCode = code.join('');
-    if (fullCode.length === 4) {
-      // Add your verification logic here
-      console.log('Verifying code:', fullCode);
-      // Navigate to appropriate screen after verification
+  const handleVerify = async () => {
+    const otp = code.join('');
+    try {
+      // Replace mock verification with actual API call
+      const response = await fetch('http://localhost:5000/app/api/forgotpassword/verifyOtp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      if (response.ok) {
+        // Navigate to the NewPassword screen after successful verification
+        navigation.navigate('PasswordCreationScreen', { email, otp });
+      } else {
+        const data = await response.json();
+        Alert.alert('Error', data.message || 'Invalid OTP');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Verification failed. Please try again later.');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-         <Image
-            source={require("../assets/images/Back.png")}/>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Image source={require("../assets/images/Back.png")} />
         </TouchableOpacity>
 
         <View style={styles.content}>
           <Text style={styles.title}>Verification</Text>
-          <Text style={styles.subtitle}>
-            We have sent a code to your email{'\n'}{email}
-          </Text>
+          <Text style={styles.subtitle}>We have sent a code to your email{'\n'}{email}</Text>
 
           <View style={styles.codeContainer}>
             {code.map((digit, index) => (
@@ -199,14 +233,8 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ navigati
           </View>
 
           <View style={styles.resendContainer}>
-            <TouchableOpacity 
-              onPress={handleResend}
-              disabled={resendTimer > 0}
-            >
-              <Text style={[
-                styles.resendText,
-                resendTimer > 0 && styles.resendTextDisabled
-              ]}>
+            <TouchableOpacity onPress={handleResend} disabled={resendTimer > 0}>
+              <Text style={[styles.resendText, resendTimer > 0 && styles.resendTextDisabled]}>
                 {resendTimer > 0 ? `Resend in ${resendTimer}sec` : 'Resend code'}
               </Text>
             </TouchableOpacity>
