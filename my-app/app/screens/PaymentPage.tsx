@@ -115,7 +115,7 @@ const PaymentPage: React.FC = ({ route, navigation }: any) => {
         order_id: orderId,
         prefill: {
           email: userData.email || "user@example.com",
-          contact: userData.phone || "9999999999",
+          contact: userData.phoneNumber || "9999999999",
           name: userData.username || "John Doe",
         },
         theme: { color: "#FF7622" },
