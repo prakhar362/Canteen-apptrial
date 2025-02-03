@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,26 +6,113 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ReviewModal from "./Review";
-
-const mockHistoryOrders = [
-  { id: "3", title: "Pasta", status: "Delivered", date: "2024-12-28", token: "A123" },
-  { id: "4", title: "Sandwich", status: "Delivered", date: "2024-12-27", token: "A124" },
-];
 
 const Orders = ({ navigation }: any) => {
   const [selectedSegment, setSelectedSegment] = useState("ongoing");
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [ongoingOrders, setOngoingOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
 
-  const mockOngoingOrders = [
-    { id: "1", title: "Pizza", status: "Preparing", date: "2024-12-30", token: "A125" },
-    { id: "2", title: "Burger", status: "Out for Delivery", date: "2024-12-29", token: "A126" },
-  ];
+  // Fetch user data (including token and userId)
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("userToken");
 
-  const data =
-    selectedSegment === "ongoing" ? mockOngoingOrders : mockHistoryOrders;
+        if (!token) {
+          Alert.alert("Error", "User not authenticated.");
+          return;
+        }
+
+        const response = await fetch(
+          "https://canteen-web-1.onrender.com/app/api/v1/profile",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setUserData(data);
+          setUserId(data._id);
+          console.log(userId);
+        } else {
+          Alert.alert("Error", "Failed to fetch user details.");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        Alert.alert("Error", "Something went wrong while fetching user data.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Fetch orders when the segment changes
+  useEffect(() => {
+    if (!userId) return; // Wait until userId is available
+
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        console.log(token);
+        if (!token) {
+          Alert.alert("Error", "User not authenticated.");
+          return;
+        }
+
+        let url = "";
+        if (selectedSegment === "ongoing") {
+          url = `https://canteen-web-1.onrender.com/app/api/v1/view-orders`; //put ${userId} in here and make chnges in backend.
+        } else {
+          url = `https://canteen-web-1.onrender.com/app/api/v1/order-history/${userId}`;
+        }
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          if (selectedSegment === "ongoing") {
+            setOngoingOrders(data);
+          } else {
+            setCompletedOrders(data);
+          }
+        } else {
+          setError("Failed to fetch orders.");
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError("Something went wrong while fetching orders.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [selectedSegment, userId]);
 
   const handleOpenReview = (order: any) => {
     setSelectedOrder(order);
@@ -38,15 +125,7 @@ const Orders = ({ navigation }: any) => {
     setReviewModalVisible(false);
   };
 
-  const handleCancelOrder = (orderId: string) => {
-    console.log("Cancelling order:", orderId);
-    // Add your cancel order logic here
-  };
-
-  const handleReorder = (order: any) => {
-    console.log("Reordering:", order);
-    // Add your reorder logic here
-  };
+  const data = selectedSegment === "ongoing" ? ongoingOrders : completedOrders;
 
   return (
     <View style={styles.container}>
@@ -98,59 +177,63 @@ const Orders = ({ navigation }: any) => {
       </View>
 
       {/* Orders List */}
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.orderCard}>
-            <View style={styles.orderHeader}>
-              <Text style={styles.orderTitle}>{item.title}</Text>
-              <Text style={styles.tokenNumber}>#{item.token}</Text>
-            </View>
-            <Text style={styles.orderStatus}>Status: {item.status}</Text>
-            <Text style={styles.orderDate}>Date: {item.date}</Text>
-            {selectedSegment === "ongoing" ? (
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.trackButton}
-                  onPress={() =>
-                    navigation.navigate("TrackOrder", { orderId: item.id })
-                  }
-                >
-                  <Text style={styles.actionButtonText}>Track Order</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => handleCancelOrder(item.id)}
-                >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.rateButton}
-                  onPress={() => handleOpenReview(item)}
-                >
-                  <Text style={styles.actionButtonText}>Rate</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.reorderButton}
-                  onPress={() => handleReorder(item)}
-                >
-                  <Text style={styles.reorderButtonText}>Reorder</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        ListEmptyComponent={
-          <Text style={styles.placeholderText}>
-            No {selectedSegment === "ongoing" ? "ongoing" : "completed"} orders.
-          </Text>
-        }
-      />
+      {loading ? (
+        <Text style={styles.placeholderText}>Loading...</Text>
+      ) : error ? (
+        <Text style={styles.placeholderText}>{error}</Text>
+      ) : (
+        <FlatList
+  data={data}
+  keyExtractor={(item:any) => item.orderId}
+  renderItem={({ item }) => (
+    <View style={styles.orderCard}>
+      <View style={styles.orderHeader}>
+        {/* Displaying all food items in one card */}
+        <Text style={styles.orderTitle}>
+          {item.items.map((foodItem:any, index:any) => (
+            <Text key={index}>
+              {foodItem.foodName}
+              {index < item.items.length - 1 && ', '}
+            </Text>
+          ))}
+        </Text>
+        <Text style={styles.tokenNumber}>#{item.orderId.slice(-4)}</Text>
+      </View>
+      <Text style={styles.orderStatus}>Status: {item.status}</Text>
+      <Text style={styles.orderDate}>Date: {new Date(item.orderDate).toLocaleString()}</Text>
+      {selectedSegment === "ongoing" ? (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.trackButton}
+            onPress={() =>
+              navigation.navigate("TrackOrder", { orderId: item.orderId })
+            }
+          >
+            <Text style={styles.actionButtonText}>Track Order</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.rateButton}
+            onPress={() => handleOpenReview(item)}
+          >
+            <Text style={styles.actionButtonText}>Rate</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  )}
+  contentContainerStyle={{ paddingBottom: 20 }}
+  ListEmptyComponent={
+    <Text style={styles.placeholderText}>
+      No {selectedSegment === "ongoing" ? "ongoing" : "completed"} orders.
+    </Text>
+  }
+/>
+
+
+      )}
 
       {/* Review Modal */}
       <ReviewModal
@@ -162,7 +245,7 @@ const Orders = ({ navigation }: any) => {
   );
 };
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f9f9f9",
@@ -184,6 +267,7 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#333",
+    marginRight:250,
   },
   segmentedControl: {
     flexDirection: "row",
@@ -258,15 +342,6 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingVertical: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#FF7622",
-  },
   rateButton: {
     flex: 1,
     backgroundColor: "#FF7622",
@@ -274,35 +349,15 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
-  reorderButton: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingVertical: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#FF7622",
-  },
   actionButtonText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 14,
-  },
-  cancelButtonText: {
-    color: "#FF7622",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  reorderButtonText: {
-    color: "#FF7622",
-    fontWeight: "bold",
-    fontSize: 14,
   },
   placeholderText: {
-    fontSize: 16,
-    color: "#666",
     textAlign: "center",
-    marginTop: 50,
+    color: "#aaa",
+    fontSize: 16,
+    marginTop: 20,
   },
 });
 
