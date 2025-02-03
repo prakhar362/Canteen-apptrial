@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 // Import your global CSS file
-
+import "../global.css";
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React from 'react';
 
