@@ -79,7 +79,7 @@ const Orders = ({ navigation }: any) => {
 
         let url = "";
         if (selectedSegment === "ongoing") {
-          url = `https://canteen-web-1.onrender.com/app/api/v1/view-orders`; //put ${userId} in here and make chnges in backend.
+          url = `https://canteen-web-1.onrender.com/app/api/v1/view-orders/${userId}`; //put ${userId} in here and make chnges in backend.
         } else {
           url = `https://canteen-web-1.onrender.com/app/api/v1/order-history/${userId}`;
         }
@@ -93,6 +93,7 @@ const Orders = ({ navigation }: any) => {
         });
 
         const data = await response.json();
+        //console.log(data);
 
         if (response.ok) {
           if (selectedSegment === "ongoing") {
