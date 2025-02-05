@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList, FoodItem } from '../navigation/AppNavigator';  // Imported interface here
+import { RootStackParamList, FoodItem } from '../navigation/AppNavigator';
 
 import Header from '@/components/Header';
 import CategoryCard from '@/components/CategoryCard';
@@ -9,6 +9,7 @@ import ProductCard from '@/components/ProductCard';
 import GlobalStyles from '@/styles/GlobalStyles';
 import SearchBar from '@/components/SearchBar';
 import Sidebar from '@/components/Sidebar';
+import OrderTrackingBubble from '@/components/OrderTrackingBubble'; // Import the tracking bubble
 
 const HomeScreen: React.FC = () => {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -24,7 +25,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     const fetchFoodItems = async () => {
       try {
-        const response = await fetch('https://canteen-web-1.onrender.com/app/api/v1/fooditem', { // Replace with actual IP address if needed
+        const response = await fetch('https://canteen-web-1.onrender.com/app/api/v1/fooditem', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ const HomeScreen: React.FC = () => {
         selectedCategory === 'All' || item.category === selectedCategory;
       const matchesSearch = item.name
         .toLowerCase()
-        .includes(searchTerm.toLowerCase()); // Use 'name' from backend
+        .includes(searchTerm.toLowerCase());
       return matchesCategory && matchesSearch;
     });
     setFilteredFoodItems(filtered);
@@ -78,7 +79,7 @@ const HomeScreen: React.FC = () => {
     return (
       <View style={[GlobalStyles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading food items...</Text> {/* Optional loading text */}
+        <Text>Loading food items...</Text>
       </View>
     );
   }
@@ -95,6 +96,7 @@ const HomeScreen: React.FC = () => {
         style={GlobalStyles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 80 }}
       >
         {/* Header */}
         <Header toggleSidebar={toggleSidebar} />
@@ -130,16 +132,21 @@ const HomeScreen: React.FC = () => {
         <View style={styles.foodGrid}>
           {filteredFoodItems.map((item: FoodItem) => (
             <ProductCard
-              key={item._id} // Use _id from the backend response
-              title={item.name} // Match field names with backend
+              key={item._id}
+              title={item.name}
               rating={item.rating}
-              time={item.time} // Ensure 'time' is available in backend data
-              imageUrl={item.img} // Ensure 'image' is available in backend data
+              time={item.time}
+              imageUrl={item.img}
               onPress={() => handleFoodItemPress(item)}
             />
           ))}
         </View>
       </ScrollView>
+
+      {/* Order Tracking Bubble at the Bottom */}
+      <View style={styles.bubbleWrapper}>
+        <OrderTrackingBubble timeRemaining={12} status="Preparing your order" />
+      </View>
     </View>
   );
 };
@@ -159,6 +166,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  bubbleWrapper: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    width: '90%',
   },
 });
 
