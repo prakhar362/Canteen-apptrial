@@ -1,21 +1,117 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons'; // Using Expo Icons
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
-const OrderTrackingBubble = ({ 
-  timeRemaining = 16, 
-  status = "Your order is confirmed" 
-}) => {
+const OrderTrackingBubble = () => {
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+  const navigation = useNavigation();
+
+  // Fetch user ID from AsyncStorage
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+
+        if (!token) {
+          Alert.alert("Error", "User not authenticated.");
+          return;
+        }
+
+        const response = await fetch(
+          "https://canteen-web-1.onrender.com/app/api/v1/profile",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+        console.log("User data: ",data);
+
+        if (response.ok) {
+          setUserId(data._id);
+        } else {
+          Alert.alert("Error", "Failed to fetch user details.");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        Alert.alert("Error", "Something went wrong while fetching user data.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Function to fetch order status
+  const fetchOrderStatus = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch(
+        `https://canteen-web-1.onrender.com/app/api/v1/orders/${userId}`
+      );
+      const data = await response.json();
+      console.log(data);
+
+      if (data.latestOrder && data.latestOrder._id) {
+        setOrder(data.latestOrder);
+      } else {
+        setOrder(null);
+      }
+    } catch (error) {
+      console.error("Error fetching order:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch and polling every 2 minutes
+  useEffect(() => {
+    fetchOrderStatus(); // Initial call
+
+    const interval = setInterval(() => {
+      fetchOrderStatus();
+    }, 120000); // 2 minutes
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [userId]);
+
+  if (loading) {
+    return <ActivityIndicator size="small" color="#FF8C00" />;
+  }
+
+  // Hide bubble if no order or order is completed
+  if (!order || order.status.toLowerCase() === "completed") {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.contentWrapper}>
         <MaterialIcons name="access-time" size={24} color="#fff" />
         <View style={styles.textContainer}>
-          <Text style={styles.timeText}>Arriving in {timeRemaining} mins</Text>
-          <Text style={styles.statusText}>{status}</Text>
+          <Text style={styles.timeText}>Your order is {order.status}</Text>
+          <Text style={styles.statusText}>Order ID: {order._id?.slice(-4)}</Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.trackButton}>
+      <TouchableOpacity
+        style={styles.trackButton}
+        onPress={() => navigation.navigate("TrackOrder")}
+      >
         <Text style={styles.trackButtonText}>Track</Text>
       </TouchableOpacity>
     </View>
@@ -24,52 +120,46 @@ const OrderTrackingBubble = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'rgba(255, 165, 0, 0.5)', // Orange tint with transparency
+    backgroundColor: "rgba(255, 165, 0, 0.95)",
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    width: '100%',
-    backdropFilter: 'blur(10px)', // Soft blur effect (iOS & Web)
+    width: "100%",
   },
   contentWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   textContainer: {
     gap: 4,
   },
   timeText: {
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
   },
   statusText: {
     fontSize: 12,
-    color: '#fff',
+    color: "#fff",
     opacity: 0.9,
   },
   trackButton: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 6,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  textGlow: {
-    textShadowColor: 'rgba(255, 255, 255, 0.8)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 6, // Creates a soft glow effect
-  },
   trackButtonText: {
-    color: '#FF8C00', // Dark orange text for contrast
+    color: "#FF8C00",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 
