@@ -1,153 +1,132 @@
-// TrackOrder.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  SafeAreaView,Image
+  SafeAreaView, View, Text, ScrollView, TouchableOpacity, Image, StyleSheet 
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import * as SecureStore from 'expo-secure-store';
+import { useNavigation } from "@react-navigation/native";
 import ReviewModal from "./Review";
-import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 
+
+const orderStatusSteps = [
+  { label: "Not Received", key: "pending" },
+  { label: "Received & Preparing", key: "accepted" },
+  { label: "Ready for Pickup", key: "prepared" },
+];
 
 const TrackOrder = () => {
-  const navigation = useNavigation(); // Hook to access navigation
-  const [progress, setProgress] = useState(1);
-  const [showReview, setShowReview] = useState(false);
+  const [order, setOrder] = useState<any>(null);
+  const [progress, setProgress] = useState(0);
+  const [isReviewModalVisible, setReviewModalVisible] = useState(false);
+  const navigation = useNavigation();
+  
+  const fetchOrderStatus = async () => {
+    try {
+      const orderId = await SecureStore.getItemAsync("secureOrderId");
+      if (!orderId) throw new Error("Order ID not found");
 
-  const handleReviewSubmit = (rating: number, comment: string) => {
-    console.log('Rating:', rating, 'Comment:', comment);
-    // Add your API call here to submit the review
-    setShowReview(false);
-  };
+      const response = await fetch(`https://canteen-web-1.onrender.com/app/api/v1/order-status/${orderId}`);
+      const data = await response.json();
+      setOrder(data);
 
-  const handleProgress = (step: number) => {
-    const newProgress = Math.min(Math.max(progress + step, 1), 3);
-    setProgress(newProgress);
-
-    if (newProgress === 3) {
-      setTimeout(() => {
-        setShowReview(true);
-      }, 5000);
+      // Update progress
+      const statusIndex = orderStatusSteps.findIndex(step => step.key === data.status);
+      if (statusIndex !== -1) {
+        setProgress(statusIndex);
+      }
+    } catch (error) {
+      console.error("Error fetching order status:", error);
     }
   };
 
+  useEffect(() => {
+    fetchOrderStatus(); // Fetch on mount
+
+    const interval = setInterval(fetchOrderStatus, 300000); // Fetch every 5 minutes
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+
+  if (!order) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <Text>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Fixed Header */}
+      {/* Header */}
       <View style={styles.header}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Home")}>
-          <Image 
-            source={require("../assets/images/Back.png")} 
-            style={styles.backImage} 
-          />
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Home")}>
+          <Image source={require("../assets/images/Back.png")} style={styles.backImage} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Track Order</Text>
       </View>
 
       {/* Scrollable Content */}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Space for Image */}
-        <View style={styles.imageContainer}>
-          {/* Add your image component here */}
-        </View>
-
-        {/* Main Content Container */}
+        <View style={styles.imageContainer} />
         <View style={styles.mainContainer}>
-          {/* Order Details */}
           <View style={styles.orderInfo}>
-            <Text style={styles.orderId}>Order Id: 115</Text>
-            <Text style={styles.orderDate}>Ordered At 06 Sept, 10:00pm</Text>
+            <Text style={styles.orderId}>Order Id: {order.orderId.slice(-4)}</Text>
+            <Text style={styles.orderDate}>Ordered On {order.date} at {order.time}</Text>
           </View>
 
           <View style={styles.itemsContainer}>
-            <Text style={styles.item}>2x Veg Cheese Aloo Frankie</Text>
-            <Text style={styles.item}>1x Veg Biryani</Text>
+            {order.items.map((item: any, index: any) => (
+              <Text key={index} style={styles.item}>{item.quantity}x {item.name}</Text>
+            ))}
           </View>
 
+          {/* Order Status Progress Bar */}
+          <View style={styles.progressContainer}>
+      {/* Vertical Line */}
+      <View style={styles.progressLineContainer}>
+        <View style={styles.progressLine} />
+        <View style={[styles.progressLineFilled, { height: `${(progress - 1) * 39}%` }]} />
+      </View>
+
+      {/* Status Points */}
+      <View style={styles.statusPoints}>
+        {[
+          { label: "Not Received", timeOffset: 5 },
+          { label: "Preparing your food", timeOffset: 10 },
+          { label: "Ready for pickup", timeOffset: 15 },
+        ].map((status, index) => (
+          <View key={index} style={styles.statusPoint}>
+            <View style={[styles.point, progress >= index  && styles.pointActive]}>
+              <View style={styles.innerPoint} />
+            </View>
+            <View style={styles.statusTextContainer}>
+              <Text style={[styles.statusText, progress >= index  && styles.statusTextActive]}>
+                {status.label}
+              </Text>
+              <Text style={styles.statusTime}>{`Expected ${order.time} + ${status.timeOffset} min`}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+
+          {/* Estimated Delivery Time */}
           <View style={styles.deliveryInfo}>
             <Text style={styles.deliveryTime}>20 min</Text>
             <Text style={styles.estimatedText}>ESTIMATED DELIVERY TIME</Text>
           </View>
 
-          {/* Vertical Progress Tracker */}
-          <View style={styles.progressContainer}>
-            {/* Vertical Line */}
-            <View style={styles.progressLineContainer}>
-              <View style={styles.progressLine} />
-              <View style={[styles.progressLineFilled, { height:`${(progress - 1) * 39}%`  }]} />
-            </View>
-
-            {/* Status Points */}
-            <View style={styles.statusPoints}>
-              <View style={styles.statusPoint}>
-                <View style={[styles.point, progress >= 1 && styles.pointActive]}>
-                  <View style={styles.innerPoint} />
-                </View>
-                <View style={styles.statusTextContainer}>
-                  <Text style={[styles.statusText, progress >= 1 && styles.statusTextActive]}>
-                    Order received
-                  </Text>
-                  <Text style={styles.statusTime}>10:00 PM</Text>
-                </View>
-              </View>
-
-              <View style={styles.statusPoint}>
-                <View style={[styles.point, progress >= 2 && styles.pointActive]}>
-                  <View style={styles.innerPoint} />
-                </View>
-                <View style={styles.statusTextContainer}>
-                  <Text style={[styles.statusText, progress >= 2 && styles.statusTextActive]}>
-                    Preparing your food
-                  </Text>
-                  <Text style={styles.statusTime}>10:05 PM</Text>
-                </View>
-              </View>
-
-              <View style={styles.statusPoint}>
-                <View style={[styles.point, progress >= 3 && styles.pointActive]}>
-                  <View style={styles.innerPoint} />
-                </View>
-                <View style={styles.statusTextContainer}>
-                  <Text style={[styles.statusText, progress >= 3 && styles.statusTextActive]}>
-                    Ready for pickup
-                  </Text>
-                  <Text style={styles.statusTime}>Expected 10:20 PM</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.yellowButton]}
-              onPress={() => handleProgress(1)}
-            >
-              <Text style={styles.buttonText}>Next Step</Text>
+          {/* Rate Order Button */}
+          {order.status === "prepared" && (
+            <TouchableOpacity style={styles.rateOrderButton} onPress={() => setReviewModalVisible(true)}>
+              <Text style={styles.rateOrderText}>Rate Order</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.greenButton]}
-              onPress={() => handleProgress(2)}
-            >
-              <Text style={styles.buttonText}>Skip to Ready</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Bottom Padding */}
-          <View style={styles.bottomPadding} />
+          )}
+  {/* Review Modal */}
+  <ReviewModal visible={isReviewModalVisible} onClose={() => setReviewModalVisible(false)} onSubmit={function (rating: number, comment: string): void {
+        throw new Error("Function not implemented.");
+      }} />
         </View>
       </ScrollView>
-
-      {/* Review Modal */}
-      <ReviewModal
-        visible={showReview}
-        onClose={() => setShowReview(false)}
-        onSubmit={handleReviewSubmit}
-      />
     </SafeAreaView>
   );
 };
@@ -164,13 +143,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    paddingTop: 8,
     backgroundColor: "#F8F9FA",
     borderBottomWidth: 1,
     borderBottomColor: "#E9ECEF",
   },
   backButton: {
     padding: 8,
+  },
+  backImage: {
+    width: 45,
+    height: 45,
+    resizeMode: "contain",
   },
   headerText: {
     fontSize: 20,
@@ -183,11 +166,6 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: "#E9ECEF",
   },
-  backImage: {
-    width: 45,
-    height: 45,
-    resizeMode: "contain",
-  },
   mainContainer: {
     flex: 1,
     backgroundColor: "#FFFFFF",
@@ -196,7 +174,6 @@ const styles = StyleSheet.create({
     marginTop: -24,
     paddingHorizontal: 20,
     paddingTop: 20,
-    minHeight: 500,
   },
   orderInfo: {
     marginBottom: 16,
@@ -237,11 +214,23 @@ const styles = StyleSheet.create({
     color: "#6C757D",
     letterSpacing: 0.5,
   },
+  rateOrderButton: {
+    backgroundColor: "#FF7622",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  rateOrderText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
   progressContainer: {
     flexDirection: "row",
     flex: 1,
     paddingLeft: 16,
-    position: 'relative',
+    position: "relative",
   },
   progressLineContainer: {
     width: 3,
@@ -308,30 +297,6 @@ const styles = StyleSheet.create({
   statusTime: {
     fontSize: 13,
     color: "#6C757D",
-  },
-  bottomPadding: {
-    height: 40,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  yellowButton: {
-    backgroundColor: "#FFC107",
-  },
-  greenButton: {
-    backgroundColor: "#28A745",
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });
 
