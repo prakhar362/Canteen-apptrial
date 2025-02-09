@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#000000",
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     marginLeft: 8,
   },
@@ -170,11 +170,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    display: "flex",
   },
   quantityButtonText: {
     color: "#000000",
     fontSize: 18,
     fontWeight: "600",
+    textAlign: "center",
+  textAlignVertical: "center",
+  lineHeight: 24,
+  paddingBottom:3,
   },
   itemQuantity: {
     color: "#000000",
@@ -195,6 +200,8 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 20,
     fontWeight: "bold",
+    textAlign: "center",
+  textAlignVertical: "center",
   },
   footer: {
     padding: 16,
@@ -207,12 +214,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   totalLabel: {
-    color: "#666666",
-    fontSize: 14,
+    fontSize: 20,
+    color: "#000000",
+    fontWeight: "600",
   },
   totalAmount: {
     color: "#000000",
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
   },
   placeOrderButton: {

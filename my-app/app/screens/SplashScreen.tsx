@@ -19,7 +19,7 @@ const SplashScreen = () => {
       />
       <Image
         style={styles.image}
-        source={require('../assets/images/Food.png')}
+        source={require('../assets/images/logo.png')}
         resizeMode="contain"
       />
     </View>
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     height: '100%', // Increases height for better control of positioning
   },
   image: {
-    width: 98,
+    width: 190,
     height: 98,
     borderRadius: 8,
   },

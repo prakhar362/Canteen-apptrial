@@ -101,9 +101,6 @@ const FoodItemDetails: React.FC = () => {
 
       <View style={styles.imageContainer}>
         <Image source={{ uri: foodDetails.img }} style={styles.image} />
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Ionicons name="heart-outline" size={24} color="#FFF" />
-        </TouchableOpacity>
       </View>
 
       <Text style={styles.title}>{foodDetails.name}</Text>
@@ -165,8 +162,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   headerText: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "600",
     marginLeft: 10,
   },
   imageContainer: {
@@ -206,8 +203,9 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   footer: {
-    justifyContent: "flex-end",
-    marginTop: 60,
+    flex: 1, 
+  justifyContent: "flex-end",
+  marginBottom: 2, 
   },
   priceQuantityContainer: {
     flexDirection: "row",
@@ -227,11 +225,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
     padding: 10,
     borderRadius: 5,
+    height:30,
+    width:35,
     marginHorizontal: 10,
+    alignItems: "center", // Centers horizontally
+  justifyContent: "center", // Centers vertically
   },
   quantityButtonText: {
     fontSize: 18,
     fontWeight: "bold",
+    textAlign: "center",
   },
   quantityText: {
     fontSize: 18,

@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       </TouchableOpacity>
 
       {/* Logo */}
-      <Image source={require('../app/assets/images/Food.png')} style={styles.image} />
+      <Image source={require('../app/assets/images/logo.png')} style={styles.image} />
 
       {/* Cart Icon */}
       <TouchableOpacity style={styles.cartContainer} onPress={handleCartPress}>

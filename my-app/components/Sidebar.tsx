@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   closeButton: {
-    alignSelf: "flex-end",
+    alignSelf: "flex-start",
     marginBottom: 20,
   },
   closeButtonText: {

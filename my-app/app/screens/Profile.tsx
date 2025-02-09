@@ -100,7 +100,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <Image source={require("../assets/images/Back.png")} />
+          <Image source={require("../assets/images/Back.png")}
+                        style={styles.backButtonImage}
+
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Personal Info</Text>
         <TouchableOpacity
@@ -236,6 +239,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginTop: 5,
+  },
+  backButtonImage: {
+    width: 40, 
+    height: 40, 
+    resizeMode: "contain",
   },
   profileDetails: {
     backgroundColor: "#f9f9f9",
