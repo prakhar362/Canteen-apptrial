@@ -38,7 +38,9 @@ const Signup = () => {
       })
       console.log(response)
       const data=await response.json();
-      console.log("Data being sent to B.E:",{...form})
+      console.log("Data being sent to B.E:",data)
+      Alert.alert("Signup completed successfully", "Please return to Login page and Enter your credentials!");
+      navigation.navigate("LogIn");
     }
   };
 
