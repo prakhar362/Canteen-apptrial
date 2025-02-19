@@ -50,9 +50,13 @@ const SignIn: React.FC = () => {
       if(data.success && data.user){
           // Save the token securely using AsyncStorage
           await AsyncStorage.setItem("userToken", data.user.re);
+          await AsyncStorage.setItem("usertokenTimestamp", Date.now().toString()); // Save current time
           // Confirm addition
       const addedToken = await AsyncStorage.getItem("userToken");
         navigation.navigate("Home");
+      }
+      else{
+        Alert.alert("Error", "Invalid Username or Password");
       }
     }
   };
