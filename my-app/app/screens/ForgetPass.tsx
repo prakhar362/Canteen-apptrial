@@ -225,7 +225,7 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ navigati
                 value={digit}
                 onChangeText={(text) => handleCodeChange(text, index)}
                 onKeyPress={(e) => handleKeyPress(e, index)}
-                keyboardType="numeric"
+                keyboardType="default"
                 maxLength={1}
                 autoFocus={index === 0}
               />
