@@ -22,7 +22,12 @@ const SplashScreen = () => {
         source={require('../assets/images/logo.png')}
         resizeMode="contain"
       />
-    </View>
+      <View style={{ position: 'absolute', bottom: 20, alignItems: 'center', width: '100%' }}>
+        <text>
+          Powered By ARPS
+        </text>
+        </View>
+      </View>
   );
 };
 
