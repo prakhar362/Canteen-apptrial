@@ -190,14 +190,15 @@ const Orders = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f9f9f9" },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 20, backgroundColor: "#fff", elevation: 3 },
-  backImage: { width: 40, height: 40, resizeMode: "contain" },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 20, backgroundColor: "#fff", elevation: 3},
+  backImage: { width: 45, height: 45, resizeMode: "contain",marginTop:15},
   headerTitle: { 
     fontSize: 24, 
     fontWeight: "bold", 
     color: "#333", 
     flex: 1,  // Takes up remaining space
     textAlign: "center",  // Centers the text
+    marginTop:15,
     marginRight: 40,  // Adjust as needed for perfect centering
   },  segmentedControl: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginVertical: 15 },
   segmentButton: { flex: 1, paddingVertical: 10, alignItems: "center", borderBottomWidth: 2, borderBottomColor: "transparent" },
