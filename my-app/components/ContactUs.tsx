@@ -17,15 +17,39 @@ const ContactUs: React.FC = () => {
 
   const navigation = useNavigation();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name || !emailAddress || !message) {
       Alert.alert("Error", "Please fill out all fields before submitting.");
       return;
     }
-    Alert.alert("Success", "Your message has been submitted!");
-    setName("");
-    setEmailAddress("");
-    setMessage("");
+  
+    try {
+      const response = await fetch("https://canteen-web-1.onrender.com/app/api/v1/contactus", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email: emailAddress,
+          message,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        Alert.alert("Success", data.message);
+        setName("");
+        setEmailAddress("");
+        setMessage("");
+      } else {
+        Alert.alert("Error", data.message);
+      }
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      Alert.alert("Error", "Something went wrong. Please try again later.");
+    }
   };
 
   return (
