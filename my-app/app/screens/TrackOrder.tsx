@@ -13,15 +13,15 @@ const orderStatusSteps = [
   { label: "Ready for Pickup", key: "prepared" },
 ];
 
-const TrackOrder = () => {
+const TrackOrder = ({ route }) => {
   const [order, setOrder] = useState<any>(null);
   const [progress, setProgress] = useState(0);
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
   const navigation = useNavigation();
-  
-  const fetchOrderStatus = async () => {
+
+  const fetchOrderStatus = async (orderIdFromProps?: string) => {
     try {
-      const orderId = await SecureStore.getItemAsync("secureOrderId");
+      const orderId = orderIdFromProps || (await SecureStore.getItemAsync("secureOrderId"));
       if (!orderId) throw new Error("Order ID not found");
 
       const response = await fetch(`https://canteen-web-1.onrender.com/app/api/v1/order-status/${orderId}`);
@@ -39,12 +39,13 @@ const TrackOrder = () => {
   };
 
   useEffect(() => {
-    fetchOrderStatus(); // Fetch on mount
+    const { orderId } = route.params || {}; // Get orderId from navigation params
+    fetchOrderStatus(orderId); // Fetch with orderId if provided
 
-    const interval = setInterval(fetchOrderStatus, 300000); // Fetch every 5 minutes
+    const interval = setInterval(() => fetchOrderStatus(orderId), 300000); // Fetch every 5 minutes
 
     return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+  }, [route.params?.orderId]); // Re-run effect if orderId changes
 
   if (!order) {
     return (
