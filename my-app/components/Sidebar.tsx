@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity,TouchableWithoutFeedback} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { RootStackParamList } from "../app/navigation/AppNavigator"; // Import the types for navigation
 import type { StackNavigationProp } from "@react-navigation/stack";
@@ -50,6 +50,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }
 };
   return (
+    <>
+    <TouchableWithoutFeedback onPress={onClose}>
     <View style={styles.sidebarContainer}>
       <View style={styles.sidebar}>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -74,6 +76,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </TouchableOpacity>
       </View>
     </View>
+    </TouchableWithoutFeedback>
+    </>
   );
 };
 
@@ -97,6 +101,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   closeButton: {
+    marginTop:15,
     alignSelf: "flex-start",
     marginBottom: 20,
   },
