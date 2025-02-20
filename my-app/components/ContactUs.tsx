@@ -73,17 +73,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   backButton: {
-    marginBottom: 10,
+    marginTop:15,
     alignSelf: "flex-start",
   },
   backButtonImage: {
-    width: 40, 
-    height: 40, 
+    width: 50, 
+    height: 50, 
     resizeMode: "contain",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    marginTop:-35,
     marginBottom: 20,
     textAlign: "center",
     color: "#333333",
