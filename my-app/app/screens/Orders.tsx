@@ -10,15 +10,16 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ReviewModal from "./Review";
+import { Modal } from "react-native";
 
 const Orders = ({ navigation }: any) => {
   const [selectedSegment, setSelectedSegment] = useState("ongoing");
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState([]); // Store all orders first
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   // Fetch user data
   useEffect(() => {
@@ -101,14 +102,17 @@ const Orders = ({ navigation }: any) => {
     };
 
     fetchOrders();
-  }, [userId, selectedSegment]); // Added selectedSegment as a dependency
+  }, [userId, selectedSegment]);
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require("../assets/images/Back.png")} style={styles.backImage} />
+          <Image
+            source={require("../assets/images/Back.png")}
+            style={styles.backImage}
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Orders</Text>
       </View>
@@ -116,18 +120,34 @@ const Orders = ({ navigation }: any) => {
       {/* Segmented Control */}
       <View style={styles.segmentedControl}>
         <TouchableOpacity
-          style={[styles.segmentButton, selectedSegment === "ongoing" && styles.activeSegment]}
+          style={[
+            styles.segmentButton,
+            selectedSegment === "ongoing" && styles.activeSegment,
+          ]}
           onPress={() => setSelectedSegment("ongoing")}
         >
-          <Text style={[styles.segmentText, selectedSegment === "ongoing" && styles.activeSegmentText]}>
+          <Text
+            style={[
+              styles.segmentText,
+              selectedSegment === "ongoing" && styles.activeSegmentText,
+            ]}
+          >
             Ongoing
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.segmentButton, selectedSegment === "history" && styles.activeSegment]}
+          style={[
+            styles.segmentButton,
+            selectedSegment === "history" && styles.activeSegment,
+          ]}
           onPress={() => setSelectedSegment("history")}
         >
-          <Text style={[styles.segmentText, selectedSegment === "history" && styles.activeSegmentText]}>
+          <Text
+            style={[
+              styles.segmentText,
+              selectedSegment === "history" && styles.activeSegmentText,
+            ]}
+          >
             Completed
           </Text>
         </TouchableOpacity>
@@ -142,48 +162,115 @@ const Orders = ({ navigation }: any) => {
         <FlatList
           data={orders}
           keyExtractor={(item: any) => item.orderId}
-          renderItem={({ item }) => (
-            <View style={styles.orderCard}>
-              <View style={styles.orderHeader}>
-                <Text style={styles.orderTitle}>
-                  {item.items.map((foodItem: any, index: any) => (
-                    <Text key={index}>
-                      {foodItem.foodName}
-                      {index < item.items.length - 1 && ", "}
-                    </Text>
-                  ))}
+          renderItem={({ item }) => {
+            const isRejected = item.status.toLowerCase() === "rejected";
+            const orderTime = new Date(item.orderDate);
+            const currentTime = new Date();
+            const timeDiff = (currentTime.getTime() - orderTime.getTime()) / 60000; // Difference in minutes
+            const isRefundValid = timeDiff <= 60; // Refund valid for 30 minutes
+
+            return (
+              <View style={styles.orderCard}>
+                <View style={styles.orderHeader}>
+                  <Text style={styles.orderTitle}>
+                    {item.items.map((foodItem: any, index: any) => (
+                      <Text key={index}>
+                        {foodItem.foodName}
+                        {index < item.items.length - 1 && ", "}
+                      </Text>
+                    ))}
+                  </Text>
+                  <Text style={styles.tokenNumber}>
+                    #{item.orderId.slice(-4)}
+                  </Text>
+                </View>
+
+                <Text
+                  style={[
+                    styles.orderStatus,
+                    isRejected && { color: "red" },
+                  ]}
+                >
+                  Status: {item.status}
                 </Text>
-                <Text style={styles.tokenNumber}>#{item.orderId.slice(-4)}</Text>
+                <Text style={styles.orderDate}>
+                  Date: {orderTime.toLocaleString()}
+                </Text>
+
+                {selectedSegment === "ongoing" ? (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.trackButton}
+                      onPress={() =>
+                        navigation.navigate("TrackOrder", { orderId: item.orderId })
+                      }
+                    >
+                      <Text style={styles.actionButtonText}>Track Order</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View style={styles.buttonContainer}>
+                    {isRejected ? (
+                      isRefundValid ? (
+                        <TouchableOpacity
+                          style={styles.refundButton}
+                          onPress={() => setShowPopup(true)}
+
+                        >
+                          <Text style={styles.actionButtonText}>Refund</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <Text style={styles.refundExpiredText}>
+                          Refund expired
+                        </Text>
+                      )
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.rateButton}
+                        onPress={() => setReviewModalVisible(true)}
+                      >
+                        <Text style={styles.actionButtonText}>Rate</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
               </View>
-              <Text style={styles.orderStatus}>Status: {item.status}</Text>
-              <Text style={styles.orderDate}>Date: {new Date(item.orderDate).toLocaleString()}</Text>
-              {selectedSegment === "ongoing" ? (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.trackButton}
-                    onPress={() => navigation.navigate("TrackOrder", { orderId: item.orderId })}
-                  >
-                    <Text style={styles.actionButtonText}>Track Order</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity style={styles.rateButton} onPress={() => setReviewModalVisible(true)}>
-                    <Text style={styles.actionButtonText}>Rate</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
+            );
+          }}
           contentContainerStyle={{ paddingBottom: 20 }}
-          ListEmptyComponent={<Text style={styles.placeholderText}>No orders found.</Text>}
+          ListEmptyComponent={
+            <Text style={styles.placeholderText}>No orders found.</Text>
+          }
         />
       )}
 
       {/* Review Modal */}
-      <ReviewModal visible={isReviewModalVisible} onClose={() => setReviewModalVisible(false)} onSubmit={function (rating: number, comment: string): void {
-        throw new Error("Function not implemented.");
-      }} />
+      <ReviewModal
+        visible={isReviewModalVisible}
+        onClose={() => setReviewModalVisible(false)}
+        onSubmit={function (rating: number, comment: string): void {
+          throw new Error("Function not implemented.");
+        }}
+      />
+      <Modal
+  transparent={true}
+  animationType="fade"
+  visible={showPopup}
+  onRequestClose={() => setShowPopup(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+      <Text style={styles.modalText}>SHOW THIS AT COUNTER</Text>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => setShowPopup(false)}
+      >
+        <Text style={styles.closeButtonText}>OK</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 };
@@ -216,6 +303,50 @@ const styles = StyleSheet.create({
   rateButton: { flex: 1, backgroundColor: "#FF7622", paddingVertical: 10, borderRadius: 5, alignItems: "center" },
   actionButtonText: { color: "#fff", fontWeight: "bold" },
   placeholderText: { textAlign: "center", color: "#aaa", fontSize: 16, marginTop: 20 },
+  refundButton: {
+    flex: 1,
+    backgroundColor: "#E03D43", // Green for refund
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  refundExpiredText: {
+    flex: 1,
+    textAlign: "center",
+    color: "#888",
+    fontSize: 14,
+    fontWeight: "bold",
+    paddingVertical: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: 300,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+  closeButton: {
+    backgroundColor: "#FF7622",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  
 });
 
 export default Orders;
