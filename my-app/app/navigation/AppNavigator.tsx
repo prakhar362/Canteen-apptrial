@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
 import Splash from "../screens/SplashScreen";
 import LogIn from "../screens/LogIn";
 import Signup from "../screens/Signup";
@@ -15,6 +16,7 @@ import { VerificationScreen, ForgotPasswordScreen } from "../screens/ForgetPass"
 import ContactUs from "../../components/ContactUs";
 import MakePayment from "../screens/PaymentPage";
 import PasswordCreationScreen from "../screens/Newpass";
+import { registerForPushNotificationsAsync, setupNotificationListener } from "../../components/Notifications"; // Ensure correct path
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -44,15 +46,13 @@ export interface FoodItem {
 }
 
 const Stack = createStackNavigator<RootStackParamList>();
-
-const TOKEN_EXPIRY_TIME = 24 * 60 * 60 * 1000 * 10; // 10 days
+const TOKEN_EXPIRY_TIME = 10 * 24 * 60 * 60 * 1000; // 10 days in milliseconds
 
 const AppNavigator: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [initialRoute, setInitialRoute] = useState<"LogIn" | "Home">("LogIn");
 
   useEffect(() => {
-    let splashTimeout: NodeJS.Timeout;
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -77,15 +77,17 @@ const AppNavigator: React.FC = () => {
       }
     };
 
-    // Start checking token
-    checkToken().then(() => {
-      // Ensure the splash screen remains visible for 5 seconds
-      splashTimeout = setTimeout(() => {
-        setIsLoading(false);
-      }, 5000);
-    });
+    const initializeApp = async () => {
+      await checkToken();
+      await registerForPushNotificationsAsync();
+      setupNotificationListener();
 
-    return () => clearTimeout(splashTimeout);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 7000); // Show splash screen for 7 seconds
+    };
+
+    initializeApp();
   }, []);
 
   if (isLoading) {

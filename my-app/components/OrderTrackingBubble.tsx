@@ -9,7 +9,9 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
+import {sendLocalNotification} from '../components/Notifications'
 
 const OrderTrackingBubble = () => {
   const [order, setOrder] = useState<any>(null);
@@ -68,6 +70,17 @@ const OrderTrackingBubble = () => {
       console.log(data);
 
       if (data.latestOrder && data.latestOrder._id) {
+        const newStatus = data.latestOrder.status;
+
+        // Get the previous status from AsyncStorage
+        const prevStatus = await AsyncStorage.getItem("orderStatus");
+
+        // If status changed, send notification and update storage
+        if (prevStatus !== newStatus) {
+          sendLocalNotification(data.latestOrder._id, newStatus);
+          await AsyncStorage.setItem("orderStatus", newStatus);
+        }
+
         setOrder(data.latestOrder);
       } else {
         setOrder(null);
@@ -85,7 +98,7 @@ const OrderTrackingBubble = () => {
 
     const interval = setInterval(() => {
       fetchOrderStatus();
-    }, 120000); // 2 minutes
+    }, 12000); // 2 minutes
 
     return () => clearInterval(interval); // Cleanup on unmount
   }, [userId]);
