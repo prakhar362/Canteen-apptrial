@@ -11,6 +11,19 @@ interface FoodItemCardProps {
   onPress: () => void; // Handler when the card is clicked
 }
 
+const roundToNearestHalf = (value: number): number => {
+  return Math.round(value * 2) / 2;
+};
+
+const formatRating = (rating: number): string => {
+  const roundedRating = roundToNearestHalf(rating); // Round to nearest 0.5
+  // Check if the rating is a whole number
+  if (roundedRating % 1 === 0) {
+    return `${roundedRating}`; // No decimal point
+  } else {
+    return `${roundedRating.toFixed(1)}`; // One decimal place
+  }
+};
 const FoodItemCard: React.FC<FoodItemCardProps> = ({
   title,
   rating,
@@ -18,13 +31,15 @@ const FoodItemCard: React.FC<FoodItemCardProps> = ({
   imageUrl,
   onPress,
 }) => {
+  // Round the rating to the nearest 0.5
+  const formattedRating = formatRating(rating);
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.rating}>⭐ Rating: 4</Text>
-        <Text style={styles.time}>⏱️ Time: 15 min</Text>
+        <Text style={styles.rating}>{formattedRating}⭐</Text>
+        <Text style={styles.time}>Time: {time}</Text>
       </View>
     </TouchableOpacity>
   );

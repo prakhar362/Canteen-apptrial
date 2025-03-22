@@ -61,7 +61,7 @@ const Orders = ({ navigation }: any) => {
 
     fetchUserData();
   }, []);
-  
+
 //load rate status
   useEffect(() => {
     const loadRatedOrders = async () => {
@@ -132,7 +132,7 @@ const Orders = ({ navigation }: any) => {
         return;
       }
   
-      const response = await fetch("http://localhost:5000/app/api/v1/submit", {
+      const response = await fetch("https://canteen-web-1.onrender.com/app/api/v1/submit", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

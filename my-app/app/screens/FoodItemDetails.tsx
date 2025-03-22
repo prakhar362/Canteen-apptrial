@@ -107,7 +107,7 @@ const FoodItemDetails: React.FC = () => {
       <Text style={styles.description}>{foodDetails.description}</Text>
 
       <View style={styles.detailsRow}>
-        <Text style={styles.rating}>Rating: ⭐ ⭐ ⭐ ⭐</Text>
+        <Text style={styles.rating}>{foodDetails.rating}⭐</Text>
       </View>
 
       <View style={styles.footer}>
