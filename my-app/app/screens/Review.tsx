@@ -13,15 +13,16 @@ import { Ionicons } from "@expo/vector-icons";
 interface ReviewModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (rating: number, comment: string) => void;
+  onSubmit: (foodItemNames: string[], rating: number, comment: string) => void;
+  foodItemNames: string[];
 }
 
-const ReviewModal: React.FC<ReviewModalProps> = ({ visible, onClose, onSubmit }) => {
+const ReviewModal: React.FC<ReviewModalProps> = ({ visible, onClose, onSubmit, foodItemNames }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
   const handleSubmit = () => {
-    onSubmit(rating, comment);
+    onSubmit(foodItemNames, rating, comment);
     setRating(0);
     setComment('');
   };

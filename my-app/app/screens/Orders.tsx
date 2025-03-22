@@ -20,6 +20,9 @@ const Orders = ({ navigation }: any) => {
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [selectedFoodItemNames, setSelectedFoodItemNames] = useState<string[]>([]);
+  const [ratedOrders, setRatedOrders] = useState<string[]>([]); // Track rated order IDs
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null); // Track the selected order ID
 
   // Fetch user data
   useEffect(() => {
@@ -57,6 +60,22 @@ const Orders = ({ navigation }: any) => {
     };
 
     fetchUserData();
+  }, []);
+  
+//load rate status
+  useEffect(() => {
+    const loadRatedOrders = async () => {
+      try {
+        const ratedOrdersJson = await AsyncStorage.getItem("ratedOrders");
+        if (ratedOrdersJson) {
+          setRatedOrders(JSON.parse(ratedOrdersJson));
+        }
+      } catch (error) {
+        console.error("Error loading rated orders:", error);
+      }
+    };
+  
+    loadRatedOrders();
   }, []);
 
   // Fetch orders
@@ -104,6 +123,44 @@ const Orders = ({ navigation }: any) => {
     fetchOrders();
   }, [userId, selectedSegment]);
 
+  const handleReviewSubmit = async (foodItemNames: string[], rating: number, comment: string) => {
+    console.log("Submitting review with:", { foodItemNames, rating, comment });
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) {
+        console.error("User not authenticated");
+        return;
+      }
+  
+      const response = await fetch("http://localhost:5000/app/api/v1/submit", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ foodItemNames, rating, comment }),
+      });
+  
+      const data = await response.json();
+      console.log("Backend response:", data);
+  
+      if (response.ok) {
+        // Mark the order as rated
+        if (selectedOrderId) {
+          const updatedRatedOrders = [...ratedOrders, selectedOrderId];
+          setRatedOrders(updatedRatedOrders);
+          await AsyncStorage.setItem("ratedOrders", JSON.stringify(updatedRatedOrders)); // Save to AsyncStorage
+        }
+        Alert.alert("Success", "Review submitted successfully");
+        setReviewModalVisible(false);
+      } else {
+        Alert.alert("Error", data.message || "Failed to submit review");
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      Alert.alert("Error", "Something went wrong while submitting the review.");
+    }
+  };
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -153,90 +210,97 @@ const Orders = ({ navigation }: any) => {
         </TouchableOpacity>
       </View>
 
-      {/* Orders List */}
-      {loading ? (
+            {/* Orders List */}
+            {loading ? (
         <Text style={styles.placeholderText}>Loading...</Text>
       ) : error ? (
         <Text style={styles.placeholderText}>{error}</Text>
       ) : (
-        <FlatList
-          data={orders}
-          keyExtractor={(item: any) => item.orderId}
-          renderItem={({ item }) => {
-            const isRejected = item.status.toLowerCase() === "rejected";
-            const orderTime = new Date(item.orderDate);
-            const currentTime = new Date();
-            const timeDiff = (currentTime.getTime() - orderTime.getTime()) / 60000; // Difference in minutes
-            const isRefundValid = timeDiff <= 60; // Refund valid for 30 minutes
+            <FlatList
+      data={orders}
+      keyExtractor={(item: any) => item.orderId}
+      renderItem={({ item }) => {
+        const isRejected = item.status.toLowerCase() === "rejected";
+        const orderTime = new Date(item.orderDate);
+        const currentTime = new Date();
+        const timeDiff = (currentTime.getTime() - orderTime.getTime()) / 60000; // Difference in minutes
+        const isRefundValid = timeDiff <= 60; // Refund valid for 30 minutes
+        const isRated = ratedOrders.includes(item.orderId); // Check if the order is rated
 
-            return (
-              <View style={styles.orderCard}>
-                <View style={styles.orderHeader}>
-                  <Text style={styles.orderTitle}>
-                    {item.items.map((foodItem: any, index: any) => (
-                      <Text key={index}>
-                        {foodItem.foodName}
-                        {index < item.items.length - 1 && ", "}
-                      </Text>
-                    ))}
+        return (
+          <View style={styles.orderCard}>
+            <View style={styles.orderHeader}>
+              <Text style={styles.orderTitle}>
+                {item.items.map((foodItem: any, index: any) => (
+                  <Text key={index}>
+                    {foodItem.foodName}
+                    {index < item.items.length - 1 && ", "}
                   </Text>
-                  <Text style={styles.tokenNumber}>
-                    #{item.orderId.slice(-4)}
-                  </Text>
-                </View>
+                ))}
+              </Text>
+              <Text style={styles.tokenNumber}>
+                #{item.orderId.slice(-4)}
+              </Text>
+            </View>
 
-                <Text
-                  style={[
-                    styles.orderStatus,
-                    isRejected && { color: "red" },
-                  ]}
+            <Text
+              style={[
+                styles.orderStatus,
+                isRejected && { color: "red" },
+              ]}
+            >
+              Status: {item.status}
+            </Text>
+            <Text style={styles.orderDate}>
+              Date: {orderTime.toLocaleString()}
+            </Text>
+
+            {selectedSegment === "ongoing" ? (
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.trackButton}
+                  onPress={() =>
+                    navigation.navigate("TrackOrder", { orderId: item.orderId })
+                  }
                 >
-                  Status: {item.status}
-                </Text>
-                <Text style={styles.orderDate}>
-                  Date: {orderTime.toLocaleString()}
-                </Text>
-
-                {selectedSegment === "ongoing" ? (
-                  <View style={styles.buttonContainer}>
+                  <Text style={styles.actionButtonText}>Track Order</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.buttonContainer}>
+                {isRejected ? (
+                  isRefundValid ? (
                     <TouchableOpacity
-                      style={styles.trackButton}
-                      onPress={() =>
-                        navigation.navigate("TrackOrder", { orderId: item.orderId })
-                      }
+                      style={styles.refundButton}
+                      onPress={() => setShowPopup(true)}
                     >
-                      <Text style={styles.actionButtonText}>Track Order</Text>
+                      <Text style={styles.actionButtonText}>Refund</Text>
                     </TouchableOpacity>
-                  </View>
+                  ) : (
+                    <Text style={styles.refundExpiredText}>
+                      Refund expired
+                    </Text>
+                  )
+                ) : isRated ? ( // Check if the order is rated
+                  <Text style={styles.alreadyRatedText}>Already Rated</Text>
                 ) : (
-                  <View style={styles.buttonContainer}>
-                    {isRejected ? (
-                      isRefundValid ? (
-                        <TouchableOpacity
-                          style={styles.refundButton}
-                          onPress={() => setShowPopup(true)}
-
-                        >
-                          <Text style={styles.actionButtonText}>Refund</Text>
-                        </TouchableOpacity>
-                      ) : (
-                        <Text style={styles.refundExpiredText}>
-                          Refund expired
-                        </Text>
-                      )
-                    ) : (
-                      <TouchableOpacity
-                        style={styles.rateButton}
-                        onPress={() => setReviewModalVisible(true)}
-                      >
-                        <Text style={styles.actionButtonText}>Rate</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
+                  <TouchableOpacity
+                    style={styles.rateButton}
+                    onPress={() => {
+                      setSelectedFoodItemNames(item.items.map((foodItem: any) => foodItem.foodName));
+                      setSelectedOrderId(item.orderId); // Set the selected order ID
+                      setReviewModalVisible(true);
+                    }}
+                  >
+                    <Text style={styles.actionButtonText}>Rate</Text>
+                  </TouchableOpacity>
                 )}
               </View>
-            );
-          }}
+            )}
+          </View>
+        );
+      }}
+
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={
             <Text style={styles.placeholderText}>No orders found.</Text>
@@ -248,9 +312,8 @@ const Orders = ({ navigation }: any) => {
       <ReviewModal
         visible={isReviewModalVisible}
         onClose={() => setReviewModalVisible(false)}
-        onSubmit={function (rating: number, comment: string): void {
-          throw new Error("Function not implemented.");
-        }}
+        onSubmit={handleReviewSubmit}
+        foodItemNames={selectedFoodItemNames}
       />
       <Modal
   transparent={true}
@@ -346,7 +409,14 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  
+  alreadyRatedText: {
+    flex: 1,
+    textAlign: "center",
+    color: "#888",
+    fontSize: 14,
+    fontWeight: "bold",
+    paddingVertical: 10,
+  },
 });
 
 export default Orders;
