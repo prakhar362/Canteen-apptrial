@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { 
-  SafeAreaView, View, Text, ScrollView, TouchableOpacity, Image, StyleSheet 
+  SafeAreaView, View, Text, ScrollView, TouchableOpacity, Image, StyleSheet,
 } from "react-native";
 import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from "@react-navigation/native";
-import ReviewModal from "./Review";
 
+import ReviewModal from "./Review";
 
 const orderStatusSteps = [
   { label: "Not Received", key: "pending" },
@@ -18,13 +18,15 @@ const TrackOrder = ({ route }) => {
   const [progress, setProgress] = useState(0);
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
   const navigation = useNavigation();
+  
 
   const fetchOrderStatus = async (orderIdFromProps?: string) => {
     try {
+     
       const orderId = orderIdFromProps || (await SecureStore.getItemAsync("secureOrderId"));
       if (!orderId) throw new Error("Order ID not found");
 
-      const response = await fetch(`https://canteen-web-1.onrender.com/app/api/v1/order-status/${orderId}`);
+      const response = await fetch(`http://192.168.29.19:5000/app/api/v1/order-status/${orderId}`);
       const data = await response.json();
       setOrder(data);
 
@@ -45,7 +47,7 @@ const TrackOrder = ({ route }) => {
     const interval = setInterval(() => fetchOrderStatus(orderId), 300000); // Fetch every 5 minutes
 
     return () => clearInterval(interval); // Cleanup on unmount
-  }, [route.params?.orderId]); // Re-run effect if orderId changes
+  }, [route.params?.orderId]); // Re-run effect if orderId changes or previousStates changes
 
   if (!order) {
     return (
@@ -54,6 +56,8 @@ const TrackOrder = ({ route }) => {
       </SafeAreaView>
     );
   }
+  const hasRejectedItems = order.items.some((item: any) => item.status === "rejected");
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -67,7 +71,9 @@ const TrackOrder = ({ route }) => {
 
       {/* Scrollable Content */}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.imageContainer} />
+      <View style={styles.imageContainer}>
+        
+        </View>
         <View style={styles.mainContainer}>
           <View style={styles.orderInfo}>
             <Text style={styles.orderId}>Order Id: {order.orderId.slice(-4)}</Text>
@@ -75,17 +81,22 @@ const TrackOrder = ({ route }) => {
           </View>
 
           <View style={styles.itemsContainer}>
-            {order.items.map((item: any, index: any) => (
-              <Text key={index} style={styles.item}>{item.quantity}x {item.name}</Text>
-            ))}
-          </View>
+  {order.items.map((item: any, index: any) => (
+    <Text 
+      key={index} 
+      style={[styles.item, { color: item.status === "accepted" ? "green" : "red" }]}
+    >
+      {item.quantity}x {item.name} [{item.status}]
+    </Text>
+  ))}
+</View>
 
           {/* Order Status Progress Bar */}
           <View style={styles.progressContainer}>
       {/* Vertical Line */}
       <View style={styles.progressLineContainer}>
         <View style={styles.progressLine} />
-        <View style={[styles.progressLineFilled, { height: `${(progress - 1) * 39}%` }]} />
+        <View style={[styles.progressLineFilled, { height: `${(progress) * 39}%` }]} />
       </View>
 
       {/* Status Points */}
@@ -127,6 +138,19 @@ const TrackOrder = ({ route }) => {
         throw new Error("Function not implemented.");
       }} />
         </View>
+
+        {/* Refund Button (Only Show if an Item is Rejected) */}
+        {hasRejectedItems && (
+          <TouchableOpacity 
+            style={styles.refundButton} 
+            onPress={() => navigation.navigate("RefundPage", { orderId: order.orderId, rejectedItems: order.items.filter((item: { status: string; }) => item.status=== "rejected") })}
+          >
+            <Text style={styles.refundButtonText}>Request Refund</Text>
+          </TouchableOpacity>
+        )}
+        <Text style={styles.noteText}>
+                * Please click "Request Refund" only at the counter. Refund will be validated by the canteen staff.
+              </Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -299,6 +323,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6C757D",
   },
+  refundButton: {
+    backgroundColor: "#FFA500",
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center", // Centers the button horizontally
+    width: "50%", // Adjust the width to make it smaller
+    maxWidth: 200, // Ensures it doesn’t become too wide on large screens
+    marginTop: 15,
+  },
+  refundButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    textAlign: "center", // Ensures text is centered within the button
+  },
+  noteText: {
+    fontSize: 14,
+    color: "black",
+    marginTop: 8,
+    textAlign: "center",
+    fontStyle: "italic",
+  }
+  
 });
 
 export default TrackOrder;
