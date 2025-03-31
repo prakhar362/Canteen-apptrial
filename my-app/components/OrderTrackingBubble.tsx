@@ -63,7 +63,7 @@ const OrderTrackingBubble = () => {
   
     try {
       const response = await fetch(
-        `http://192.168.29.19:5000/app/api/v1/orders/${userId}`
+        `https://canteen-web-1.onrender.com/app/api/v1/orders/${userId}`
       );
       const data = await response.json();
       console.log(data);
@@ -98,6 +98,7 @@ const OrderTrackingBubble = () => {
 
               // Update stored values in parallel
               await Promise.all([
+                await SecureStore.setItemAsync("secureOrderId", nextOrderId),
                 AsyncStorage.setItem("nextOrderId", nextOrderId),
                 AsyncStorage.setItem("nextOrderStatus", nextOrderStatus),
               ]);
