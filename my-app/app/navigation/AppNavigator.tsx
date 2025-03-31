@@ -16,6 +16,7 @@ import { VerificationScreen, ForgotPasswordScreen } from "../screens/ForgetPass"
 import ContactUs from "../../components/ContactUs";
 import MakePayment from "../screens/PaymentPage";
 import PasswordCreationScreen from "../screens/Newpass";
+import RefundPage from "../screens/RefundPage";
 import { registerForPushNotificationsAsync, setupNotificationListener } from "../../components/Notifications"; // Ensure correct path
 
 export type RootStackParamList = {
@@ -34,6 +35,7 @@ export type RootStackParamList = {
   Verification: { email: string };
   ContactUs: undefined;
   PasswordCreationScreen: { email: string; otp: string };
+  RefundPage:undefined;
 };
 
 export interface FoodItem {
@@ -106,6 +108,7 @@ const AppNavigator: React.FC = () => {
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="Orders" component={Orders} />
       <Stack.Screen name="Cart" component={Cart} />
+      <Stack.Screen name="RefundPage" component={RefundPage} />
       <Stack.Screen name="ContactUs" component={ContactUs} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="Verification" component={VerificationScreen} />
