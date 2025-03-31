@@ -58,30 +58,58 @@ const OrderTrackingBubble = () => {
     fetchUserData();
   }, []);
 
-  // Function to fetch order status
   const fetchOrderStatus = async () => {
     if (!userId) return;
-
+  
     try {
       const response = await fetch(
-        `https://canteen-web-1.onrender.com/app/api/v1/orders/${userId}`
+        `http://192.168.29.19:5000/app/api/v1/orders/${userId}`
       );
       const data = await response.json();
       console.log(data);
-
+  
       if (data.latestOrder && data.latestOrder._id) {
-        const newStatus = data.latestOrder.status;
-
+        const latestOrder = data.latestOrder;
+        const newStatus = latestOrder.status.toLowerCase();
+  
         // Get the previous status from AsyncStorage
         const prevStatus = await AsyncStorage.getItem("orderStatus");
-
-        // If status changed, send notification and update storage
+  
         if (prevStatus !== newStatus) {
-          sendLocalNotification(data.latestOrder._id, newStatus);
+          sendLocalNotification(latestOrder._id, newStatus);
           await AsyncStorage.setItem("orderStatus", newStatus);
         }
+  
+        // If the latest order is completed or rejected
+        if (newStatus === "completed" || newStatus === "rejected") {
+          if (data.nextOrder && data.nextOrder._id) {
+            const nextOrderId = data.nextOrder._id;
+            const nextOrderStatus = data.nextOrder.status.toLowerCase();
 
-        setOrder(data.latestOrder);
+            // Retrieve the last notified nextOrderId and nextOrderStatus
+            const [storedNextOrderId, storedNextOrderStatus] = await Promise.all([
+              AsyncStorage.getItem("nextOrderId"),
+              AsyncStorage.getItem("nextOrderStatus"),
+            ]);
+
+            // Send notification ONLY if the nextOrderId OR nextOrderStatus has changed
+            if (storedNextOrderId !== nextOrderId || storedNextOrderStatus !== nextOrderStatus) {
+              sendLocalNotification(nextOrderId, nextOrderStatus);
+
+              // Update stored values in parallel
+              await Promise.all([
+                AsyncStorage.setItem("nextOrderId", nextOrderId),
+                AsyncStorage.setItem("nextOrderStatus", nextOrderStatus),
+              ]);
+            }
+
+            setOrder(data.nextOrder);
+          } else {
+            setOrder(null); // Hide the bubble if no next order
+          }
+        } else {
+          setOrder(latestOrder);
+        }
       } else {
         setOrder(null);
       }
@@ -91,6 +119,7 @@ const OrderTrackingBubble = () => {
       setLoading(false);
     }
   };
+  
 
   // Initial fetch and polling every 2 minutes
   useEffect(() => {
@@ -109,6 +138,7 @@ const OrderTrackingBubble = () => {
 
   // Hide bubble if no order or order is completed
   if (!order || order.status.toLowerCase() === "completed") {
+    
     return null;
   }
 
