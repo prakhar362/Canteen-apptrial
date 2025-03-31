@@ -4,7 +4,6 @@ import {
 } from "react-native";
 import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from "@react-navigation/native";
-
 import ReviewModal from "./Review";
 
 const orderStatusSteps = [
@@ -17,8 +16,31 @@ const TrackOrder = ({ route }) => {
   const [order, setOrder] = useState<any>(null);
   const [progress, setProgress] = useState(0);
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
+  const [isReviewSubmitted, setReviewSubmitted] = useState(false); // Track if review is submitted
   const navigation = useNavigation();
-  
+
+  // State to save the review data
+  const [reviewData, setReviewData] = useState({
+    rating: 0,
+    comment: "",
+    foodItems: [] as string[],
+  });
+
+  // Handle form submission to save the review
+  const handleReviewSubmit = (foodItemNames: string[], rating: number, comment: string) => {
+    setReviewData({
+      rating,
+      comment,
+      foodItems: foodItemNames,
+    });
+
+    setReviewSubmitted(true);
+    // Close the modal after submission
+    setReviewModalVisible(false);
+
+    // Optionally, you can send this data to a backend or store it as needed
+    console.log("Review Submitted:", { foodItemNames, rating, comment });
+  };
 
   const fetchOrderStatus = async (orderIdFromProps?: string) => {
     try {
@@ -26,7 +48,7 @@ const TrackOrder = ({ route }) => {
       const orderId = orderIdFromProps || (await SecureStore.getItemAsync("secureOrderId"));
       if (!orderId) throw new Error("Order ID not found");
 
-      const response = await fetch(`http://192.168.29.19:5000/app/api/v1/order-status/${orderId}`);
+      const response = await fetch(`https://canteen-web-1.onrender.com/app/api/v1/order-status/${orderId}`);
       const data = await response.json();
       setOrder(data);
 
@@ -57,7 +79,8 @@ const TrackOrder = ({ route }) => {
     );
   }
   const hasRejectedItems = order.items.some((item: any) => item.status === "rejected");
-
+  const foodItemNames: string[] = order.items.map((item: any) => item.name);
+  //console.log(foodItemNames);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -72,7 +95,7 @@ const TrackOrder = ({ route }) => {
       {/* Scrollable Content */}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       <View style={styles.imageContainer}>
-        
+      
         </View>
         <View style={styles.mainContainer}>
           <View style={styles.orderInfo}>
@@ -126,17 +149,23 @@ const TrackOrder = ({ route }) => {
             <Text style={styles.deliveryTime}>20 min</Text>
             <Text style={styles.estimatedText}>ESTIMATED DELIVERY TIME</Text>
           </View>
-
           {/* Rate Order Button */}
-          {order.status === "prepared" && (
-            <TouchableOpacity style={styles.rateOrderButton} onPress={() => setReviewModalVisible(true)}>
-              <Text style={styles.rateOrderText}>Rate Order</Text>
-            </TouchableOpacity>
-          )}
-  {/* Review Modal */}
-  <ReviewModal visible={isReviewModalVisible} onClose={() => setReviewModalVisible(false)} onSubmit={function (rating: number, comment: string): void {
-        throw new Error("Function not implemented.");
-      }} />
+      {!isReviewSubmitted && order.status === "prepared" && (
+        <TouchableOpacity
+          style={styles.rateOrderButton}
+          onPress={() => setReviewModalVisible(true)}
+        >
+          <Text style={styles.rateOrderText}>Rate Order</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Review Modal */}
+      <ReviewModal
+        visible={isReviewModalVisible}
+        onClose={() => setReviewModalVisible(false)}
+        onSubmit={handleReviewSubmit} // Pass the handleReviewSubmit function here
+        foodItemNames={foodItemNames} // Pass the food items to the modal
+      />
         </View>
 
         {/* Refund Button (Only Show if an Item is Rejected) */}
