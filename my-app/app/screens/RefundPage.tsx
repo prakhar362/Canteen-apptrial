@@ -14,7 +14,7 @@ const RefundPage: React.FC<RefundPageProps> = ({ route }) => {
   const navigation = useNavigation();
   const { orderId, rejectedItems } = route.params;
   const [isRequested, setIsRequested] = useState(false);
-
+  console.log("Rejected items: ", rejectedItems);
   useEffect(() => {
     // Check if the refund has already been requested
     const checkRefundStatus = async () => {
@@ -42,11 +42,16 @@ const RefundPage: React.FC<RefundPageProps> = ({ route }) => {
 
       <Text style={styles.subTitle}>Rejected Items:</Text>
       {Array.isArray(rejectedItems) && rejectedItems.length > 0 ? (
-        rejectedItems.map((item, index) => (
-          <Text key={index} style={styles.itemText}>
-            {item.name} - ₹{item.price.toFixed(2)}
+        <>
+          {rejectedItems.map((item, index) => (
+            <Text key={index} style={styles.itemText}>
+              {item.name} - ₹{item.price.toFixed(2)} x {item.quantity} = <Text style={styles.boldText}>₹{(item.price * item.quantity).toFixed(2)}</Text>
+            </Text>
+          ))}
+          <Text style={[styles.totalText, styles.boldText]}>
+            Total to be refunded: ₹{rejectedItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2)}
           </Text>
-        ))
+        </>
       ) : (
         <Text style={styles.itemText}>No rejected items found.</Text>
       )}
@@ -126,5 +131,12 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     marginBottom: 20,
   },
-  
+  boldText: {
+    fontWeight: 'bold',
+  },
+  totalText: {
+    fontSize: 18,
+    marginTop: 10,
+    color: '#333',
+  },
 });
