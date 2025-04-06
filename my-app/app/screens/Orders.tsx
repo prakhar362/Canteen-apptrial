@@ -23,6 +23,7 @@ const Orders = ({ navigation }: any) => {
   const [selectedFoodItemNames, setSelectedFoodItemNames] = useState<string[]>([]);
   const [ratedOrders, setRatedOrders] = useState<string[]>([]); // Track rated order IDs
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null); // Track the selected order ID
+  const [refundStatuses, setRefundStatuses] = useState<{[key: string]: boolean}>({}); // Track refund statuses
 
   // Fetch user data
   useEffect(() => {
@@ -106,6 +107,7 @@ const Orders = ({ navigation }: any) => {
         });
 
         const data = await response.json();
+        console.log(data);
 
         if (response.ok) {
           setOrders(data);
@@ -122,6 +124,19 @@ const Orders = ({ navigation }: any) => {
 
     fetchOrders();
   }, [userId, selectedSegment]);
+
+  // Check refund status for all orders
+  useEffect(() => {
+    const checkRefundStatuses = async () => {
+      const newRefundStatuses: {[key: string]: boolean} = {};
+      for (const order of orders) {
+        const status = await AsyncStorage.getItem(`refund_${order.orderId}`);
+        newRefundStatuses[order.orderId] = status === "granted";
+      }
+      setRefundStatuses(newRefundStatuses);
+    };
+    checkRefundStatuses();
+  }, [orders]);
 
   const handleReviewSubmit = async (foodItemNames: string[], rating: number, comment: string) => {
     console.log("Submitting review with:", { foodItemNames, rating, comment });
@@ -269,19 +284,22 @@ const Orders = ({ navigation }: any) => {
             ) : (
               <View style={styles.buttonContainer}>
                 {isRejected ? (
-                  isRefundValid ? (
+                  isRefundValid && !refundStatuses[item.orderId] ? (
                     <TouchableOpacity
                       style={styles.refundButton}
-                      onPress={() => setShowPopup(true)}
+                      onPress={() => navigation.navigate("RefundPage", { 
+                        orderId: item.orderId,
+                        rejectedItems: item.items.filter((foodItem: any) => foodItem.status === "rejected")
+                      })}
                     >
                       <Text style={styles.actionButtonText}>Refund</Text>
                     </TouchableOpacity>
                   ) : (
                     <Text style={styles.refundExpiredText}>
-                      Refund expired
+                      {refundStatuses[item.orderId]? "Refund Granted" : "Refund expired"}
                     </Text>
                   )
-                ) : isRated ? ( // Check if the order is rated
+                ) : isRated ? (
                   <Text style={styles.alreadyRatedText}>Already Rated</Text>
                 ) : (
                   <TouchableOpacity
