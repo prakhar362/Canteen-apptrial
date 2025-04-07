@@ -3,8 +3,9 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from "react-na
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import { RootStackParamList } from '../navigation/AppNavigator'; 
+import * as SecureStore from "expo-secure-store";
+import { RootStackParamList } from '../navigation/AppNavigator';
+import { useCart } from '../context/CartContext';
 
 type PaymentScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PaymentSuccessful'>;
 
@@ -13,6 +14,7 @@ const PaymentSuccessful: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userData, setUserData] = useState<any>(null);
   const [tokenNo, setTokenNo] = useState<string | null>(null);
+  const { clearCart } = useCart();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -66,23 +68,32 @@ const PaymentSuccessful: React.FC = () => {
             body: JSON.stringify({ userId }),
           }
         );
-
+  
         const tokenData = await tokenResponse.json();
-
+  
         if (!tokenData.success) {
           Alert.alert("Error", "Failed to retrieve token number.");
           return;
         }
+  
+        const fullOrderId = tokenData.orderId; // Full order ID
+  
+        // Store securely in SecureStore
+        await SecureStore.setItemAsync("secureOrderId", fullOrderId);
+  
+        // Display only the last 4 characters
+        setTokenNo(fullOrderId.slice(-4)); 
 
-        setTokenNo(tokenData.orderId);
+        // Clear the cart after successful payment
+        clearCart();
       } catch (error) {
         console.error("Error fetching token number:", error);
         Alert.alert("Error", "Something went wrong while fetching token number.");
       }
     };
-
+  
     fetchToken();
-  }, [userId]);
+  }, [userId, clearCart]);
 
   const handleTrackOrder = () => {
     navigation.navigate('TrackOrder');
