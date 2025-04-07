@@ -22,6 +22,12 @@ const CartScreen: React.FC = () => {
       (total, item) => total + item.price * item.quantity,
       0
     );
+    const formattedRating = (rating:any) => {
+      const roundedRating = Math.round(rating * 2) / 2; // Round to the nearest 0.5
+      const fullStars = Math.ceil(roundedRating); // Convert 1.5 to 2, 3.2 to 3, etc.
+    
+      return '⭐'.repeat(fullStars); // Generate stars
+    };
 
   const renderCartItem = ({ item }:any) => (
     <View style={styles.cartItem}>
@@ -31,7 +37,7 @@ const CartScreen: React.FC = () => {
 
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle}>{item.title}</Text>
-        <Text>⭐ ⭐ ⭐ ⭐</Text>
+        <Text style={styles.itemTitle}>{formattedRating(item.rating)}</Text>
         <Text style={styles.itemPrice}>₹{item.price}</Text>
       </View>
       <View style={styles.rightContainer}>
@@ -69,7 +75,7 @@ const CartScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.backButton}>
         <Image source={require("../assets/images/Back.png")} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cart</Text>
@@ -106,6 +112,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
+    marginTop:10,
   },
   backButton: {
     padding: 8,
@@ -198,7 +205,7 @@ const styles = StyleSheet.create({
   },
   removeButtonText: {
     color: "#FFFFFF",
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
   textAlignVertical: "center",
