@@ -146,7 +146,11 @@ const TrackOrder = ({ route }) => {
 
           {/* Estimated Delivery Time */}
           <View style={styles.deliveryInfo}>
-            <Text style={styles.deliveryTime}>20 min</Text>
+            <Text style={styles.deliveryTime}>
+              {order.status === "pending" ? "20 min" : 
+               order.status === "accepted" ? "15 min" : 
+               order.status === "prepared" ? "Ready for pickup" : "20 min"}
+            </Text>
             <Text style={styles.estimatedText}>ESTIMATED DELIVERY TIME</Text>
           </View>
           {/* Rate Order Button */}
@@ -360,7 +364,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "center", // Centers the button horizontally
     width: "50%", // Adjust the width to make it smaller
-    maxWidth: 200, // Ensures it doesn’t become too wide on large screens
+    maxWidth: 200, // Ensures it doesn't become too wide on large screens
     marginTop: 15,
   },
   refundButtonText: {
