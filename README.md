@@ -17,9 +17,10 @@ A trial mobile application for managing canteen orders, menus, and user interact
 - **Cart Management:** Add, remove, and edit items in cart before checkout.
 
 ## Demo Video Link: 
-## Screenshots
+https://drive.google.com/file/d/1J1i7-Ezdbi8xhfaJpb_vi9RYgQ9jAGbD/view?usp=drivesdk
 
-*(Add screenshots here if available for better context)*
+## Screenshots
+<img src="https://i.imgur.com/f4Mt6hA.png" width="300"> <img src="https://i.imgur.com/DAZDQGX.png" width="300"> <img src="https://i.imgur.com/ComMcQE.png" width="300">
 
 ## Getting Started
 
