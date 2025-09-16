@@ -19,6 +19,12 @@ A trial mobile application for managing canteen orders, menus, and user interact
 ## Demo Video Link: 
 https://drive.google.com/file/d/1J1i7-Ezdbi8xhfaJpb_vi9RYgQ9jAGbD/view?usp=drivesdk
 
+## App Screenshots: 
+<img width="714" height="1599" alt="image" src="https://github.com/user-attachments/assets/94a3e4c1-0ea2-4603-89dd-679e489d1403" /><img width="714" height="1599" alt="image" src="https://github.com/user-attachments/assets/e80f7cf4-b8d1-4028-a708-28912545895f" /><img width="714" height="1599" alt="image" src="https://github.com/user-attachments/assets/a0b80187-f27b-47c4-a851-661abe5e41c2" />
+<img width="682" height="1362" alt="image" src="https://github.com/user-attachments/assets/a230080b-b7f8-4552-aa79-15b7242cd0db" />
+<img width="714" height="1599" alt="image" src="https://github.com/user-attachments/assets/acbb7674-ca47-4a37-9ad5-253476096797" />
+
+
 ## Getting Started
 
 Follow these instructions to set up and run the project locally.
